@@ -55,7 +55,7 @@ class _RegistroPageState extends State<RegistroPage> {
             .collection('usuarios')
             .doc(userCredential.user!.uid)
             .set({
-          'nombre': _nombreController.text,
+          'nombreCompleto': _nombreController.text,
           'email': _emailController.text,
           'telefono': _telefonoController.text,
           'direccion': _direccionController.text,
