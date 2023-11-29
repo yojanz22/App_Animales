@@ -37,7 +37,7 @@ class _MenuPageState extends State<MenuPage>
           .get();
       if (userSnapshot.exists) {
         setState(() {
-          nombreUsuario = userSnapshot['nombre'];
+          nombreUsuario = userSnapshot['nombreUsuario'];
         });
       }
     } catch (error) {
@@ -81,7 +81,7 @@ class _MenuPageState extends State<MenuPage>
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                   Text(
-                    nombreUsuario, // Mostrar el nombre del usuario obtenido de Firestore
+                    nombreUsuario,
                     style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
