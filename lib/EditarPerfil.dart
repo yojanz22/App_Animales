@@ -3,28 +3,42 @@ import 'package:flutter/material.dart';
 class EditarPerfilPage extends StatefulWidget {
   final String nombreActual;
   final String correoActual;
+  final String nombreUsuarioActual;
+  final String telefonoActual;
+  final String direccionActual;
 
-  EditarPerfilPage({required this.nombreActual, required this.correoActual});
+  EditarPerfilPage({
+    required this.nombreActual,
+    required this.correoActual,
+    required this.nombreUsuarioActual,
+    required this.telefonoActual,
+    required this.direccionActual,
+  });
 
   @override
   _EditarPerfilPageState createState() => _EditarPerfilPageState();
 }
 
 class _EditarPerfilPageState extends State<EditarPerfilPage> {
-  final TextEditingController _nombreController = TextEditingController();
-  final TextEditingController _correoController = TextEditingController();
+  late TextEditingController _correoController;
+  late TextEditingController _telefonoController;
+  late TextEditingController _direccionController;
+  late TextEditingController _passwordController;
 
   @override
   void initState() {
     super.initState();
-    _nombreController.text = widget.nombreActual;
-    _correoController.text = widget.correoActual;
+    _correoController = TextEditingController(text: widget.correoActual);
+    _telefonoController = TextEditingController(text: widget.telefonoActual);
+    _direccionController = TextEditingController(text: widget.direccionActual);
+    _passwordController = TextEditingController();
   }
 
-  void _guardarCambios() {
-    // Lógica para guardar los cambios en el perfil
-    String nuevoNombre = _nombreController.text;
+  void _actualizarPerfil() {
+    // Lógica para actualizar el perfil
     String nuevoCorreo = _correoController.text;
+    String nuevoTelefono = _telefonoController.text;
+    String nuevaDireccion = _direccionController.text;
 
     // Aquí puedes realizar operaciones como actualizar la información en Firestore
     // o cualquier otro lugar donde almacenes los datos del usuario.
@@ -43,21 +57,34 @@ class _EditarPerfilPageState extends State<EditarPerfilPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _nombreController,
-              decoration: InputDecoration(labelText: 'Nuevo Nombre'),
-            ),
-            SizedBox(height: 10),
             TextField(
               controller: _correoController,
               decoration:
                   InputDecoration(labelText: 'Nuevo Correo Electrónico'),
             ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _telefonoController,
+              decoration:
+                  InputDecoration(labelText: 'Nuevo Número de Teléfono'),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _direccionController,
+              decoration: InputDecoration(labelText: 'Nueva Dirección'),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(labelText: 'Contraseña'),
+              obscureText: true,
+            ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _guardarCambios,
-              child: Text('Guardar Cambios'),
+              onPressed: _actualizarPerfil,
+              child: Text('Actualizar Perfil'),
             ),
           ],
         ),

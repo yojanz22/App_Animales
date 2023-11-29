@@ -24,6 +24,13 @@ class _RegistroPageState extends State<RegistroPage> {
   final _formKey =
       GlobalKey<FormState>(); // Agrega una clave global para el formulario
 
+  String generarNombreUsuario(String nombreCompleto) {
+    String primerNombre = nombreCompleto.split(' ')[0];
+    Random random = Random();
+    int numeroAleatorio = random.nextInt(10000); // Máximo de 4 dígitos
+    return '$primerNombre$numeroAleatorio';
+  }
+
   Future<void> _register() async {
     if (_formKey.currentState?.validate() ?? false) {
       // Formulario válido
@@ -41,9 +48,8 @@ class _RegistroPageState extends State<RegistroPage> {
           password: _passwordController.text,
         );
 
-        // Generar nombre de usuario con el primer nombre y un número único
-        String nombreUsuario = _nombreController.text.split(' ')[0] +
-            DateTime.now().millisecondsSinceEpoch.toString();
+        // Generar nombre de usuario con el primer nombre y un máximo de 4 números aleatorios
+        String nombreUsuario = generarNombreUsuario(_nombreController.text);
 
         await _firestore
             .collection('usuarios')
@@ -100,7 +106,6 @@ class _RegistroPageState extends State<RegistroPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // ... (Otros campos)
                 TextFormField(
                   controller: _nombreController,
                   validator: (value) {
@@ -112,7 +117,65 @@ class _RegistroPageState extends State<RegistroPage> {
                   decoration: InputDecoration(labelText: 'Nombre completo'),
                 ),
                 SizedBox(height: 10),
-                // ... (Otros campos)
+                TextFormField(
+                  controller: _emailController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, ingrese su correo electrónico';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(labelText: 'Correo Electrónico'),
+                ),
+                SizedBox(height: 10),
+                TextFormField(
+                  controller: _telefonoController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, ingrese su número de teléfono';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(labelText: 'Número de Teléfono'),
+                ),
+                SizedBox(height: 10),
+                TextFormField(
+                  controller: _direccionController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, ingrese su dirección';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(labelText: 'Dirección'),
+                ),
+                SizedBox(height: 10),
+                TextFormField(
+                  controller: _passwordController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, ingrese su contraseña';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(labelText: 'Contraseña'),
+                  obscureText: true,
+                ),
+                SizedBox(height: 10),
+                TextFormField(
+                  controller: _repeatPasswordController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, repita su contraseña';
+                    } else if (value != _passwordController.text) {
+                      return 'Las contraseñas no coinciden';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(labelText: 'Repetir Contraseña'),
+                  obscureText: true,
+                ),
+                SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _register,
                   child: Text('Registrarse'),

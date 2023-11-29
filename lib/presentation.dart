@@ -26,7 +26,6 @@ class _PresentationState extends State<Presentation>
         .chain(CurveTween(curve: Curves.elasticOut))
         .animate(_animationController);
 
-    // Inicia la animación y luego navega a la página de inicio de sesión al finalizar
     _animationController.forward();
   }
 
@@ -76,21 +75,16 @@ class _PresentationState extends State<Presentation>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Agregar esta parte para navegar a la LoginPage cuando la animación se completa
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        // Verificar si hay un usuario autenticado
         User? user = FirebaseAuth.instance.currentUser;
 
         if (user != null) {
-          // Si hay un usuario autenticado, navega a la página principal
-          // Aquí debes reemplazar `MainPage` con la página principal real de tu aplicación
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => MenuPage(user: user)),
           );
         } else {
-          // Si no hay un usuario autenticado, navega a la página de inicio de sesión
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => LoginPage()),

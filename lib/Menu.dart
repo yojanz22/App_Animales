@@ -2,7 +2,7 @@ import 'package:appanimales/EditarPerfil.dart';
 import 'package:appanimales/GoogleMap.dart';
 import 'package:appanimales/Mascotas.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Importar Firestore
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class MenuPage extends StatefulWidget {
@@ -17,19 +17,21 @@ class MenuPage extends StatefulWidget {
 class _MenuPageState extends State<MenuPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String nombreUsuario = ''; // Variable para almacenar el nombre del usuario
+  String nombreUsuario = '';
+  String telefono = ''; // Agregar esto si es necesario
+  String direccion = ''; // Agregar esto si es necesario
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
 
-    // Llamar a la función para cargar el nombre del usuario desde Firestore
-    cargarNombreUsuario();
+    // Llamar a la función para cargar la información del usuario desde Firestore
+    cargarInformacionUsuario();
   }
 
-  // Función para cargar el nombre del usuario desde Firestore
-  void cargarNombreUsuario() async {
+  // Función para cargar la información del usuario desde Firestore
+  void cargarInformacionUsuario() async {
     try {
       DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
           .collection('usuarios')
@@ -38,10 +40,12 @@ class _MenuPageState extends State<MenuPage>
       if (userSnapshot.exists) {
         setState(() {
           nombreUsuario = userSnapshot['nombreUsuario'];
+          telefono = userSnapshot['telefono'] ?? '';
+          direccion = userSnapshot['direccion'] ?? '';
         });
       }
     } catch (error) {
-      print('Error al cargar el nombre del usuario: $error');
+      print('Error al cargar la información del usuario: $error');
     }
   }
 
@@ -100,6 +104,9 @@ class _MenuPageState extends State<MenuPage>
                     builder: (context) => EditarPerfilPage(
                       nombreActual: nombreUsuario,
                       correoActual: widget.user?.email ?? '',
+                      nombreUsuarioActual: nombreUsuario,
+                      telefonoActual: telefono,
+                      direccionActual: direccion,
                     ),
                   ),
                 );
