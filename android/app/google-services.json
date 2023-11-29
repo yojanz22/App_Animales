@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "739961319251",
+    "project_id": "dondeestamimascota-38267",
+    "storage_bucket": "dondeestamimascota-38267.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:739961319251:android:24a3e022f7a37d6f63fba6",
+        "android_client_info": {
+          "package_name": "com.example.appanimales"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXecycxqe_WgN34_H0zq3WIwnGrrSqiqE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
