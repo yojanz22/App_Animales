@@ -1,8 +1,6 @@
-// login_page.dart
-
+import 'package:appanimales/Menu.dart';
+import 'package:appanimales/RegistroPage.dart';
 import 'package:flutter/material.dart';
-import 'registroPage.dart'; // Importa la página de registro
-import 'menu.dart'; // Importa la página de menú
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,7 +13,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  String _errorMessage = ''; // Variable para almacenar el mensaje de error
+  String _errorMessage = '';
 
   Future<void> _login() async {
     try {
@@ -24,13 +22,17 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
 
-      // Navegar a la página de menú después del inicio de sesión exitoso
+      // Obtener el usuario autenticado después del inicio de sesión exitoso
+      User? user = FirebaseAuth.instance.currentUser;
+
+      // Navegar a la página de menú pasando el usuario como parámetro
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MenuPage()),
+        MaterialPageRoute(
+          builder: (context) => MenuPage(user: user),
+        ),
       );
     } catch (e) {
-      // Actualizar el mensaje de error y forzar la reconstrucción del widget
       setState(() {
         _errorMessage = 'Error en el inicio de sesión: $e';
       });
@@ -41,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Inicio de sesion'),
+        title: Text('Inicio de Sesión'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -51,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'Correo electrónico'),
+              decoration: InputDecoration(labelText: 'Correo Electrónico'),
             ),
             SizedBox(height: 10),
             TextField(
@@ -62,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _login,
-              child: Text('Iniciar sesión'),
+              child: Text('Iniciar Sesión'),
             ),
             SizedBox(height: 20),
             Row(
@@ -70,14 +72,14 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    // Agrega la lógica para lo que quieres hacer cuando se presiona el botón de Google
+                    // Lógica para autenticación con Google
                   },
                   child: Text('Google'),
                 ),
                 SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {
-                    // Agrega la lógica para lo que quieres hacer cuando se presiona el botón de Facebook
+                    // Lógica para autenticación con Facebook
                   },
                   child: Text('Facebook'),
                 ),

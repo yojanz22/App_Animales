@@ -1,4 +1,6 @@
 import 'package:appanimales/LoginPage.dart';
+import 'package:appanimales/Menu.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Presentation extends StatefulWidget {
@@ -77,10 +79,23 @@ class _PresentationState extends State<Presentation>
     // Agregar esta parte para navegar a la LoginPage cuando la animación se completa
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
+        // Verificar si hay un usuario autenticado
+        User? user = FirebaseAuth.instance.currentUser;
+
+        if (user != null) {
+          // Si hay un usuario autenticado, navega a la página principal
+          // Aquí debes reemplazar `MainPage` con la página principal real de tu aplicación
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MenuPage(user: user)),
+          );
+        } else {
+          // Si no hay un usuario autenticado, navega a la página de inicio de sesión
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
+        }
       }
     });
   }
