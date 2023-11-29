@@ -23,38 +23,66 @@ class EditarPerfilPage extends StatefulWidget {
 
 class _EditarPerfilPageState extends State<EditarPerfilPage> {
   late TextEditingController _nombreController;
+  late TextEditingController _correoController;
   late TextEditingController _telefonoController;
   late TextEditingController _direccionController;
+  late TextEditingController _passwordController;
+  late TextEditingController _repeatPasswordController;
 
   @override
   void initState() {
     super.initState();
     _nombreController =
         TextEditingController(text: widget.nombreCompletoActual);
+    _correoController = TextEditingController(text: widget.correoActual);
     _telefonoController = TextEditingController(text: widget.telefonoActual);
     _direccionController = TextEditingController(text: widget.direccionActual);
+    _passwordController = TextEditingController();
+    _repeatPasswordController = TextEditingController();
   }
 
   void _guardarCambios() async {
+    // Lógica para guardar los cambios en el perfil
     String nuevoNombreCompleto = _nombreController.text;
+    String nuevoCorreo = _correoController.text;
     String nuevoTelefono = _telefonoController.text;
     String nuevaDireccion = _direccionController.text;
+    String nuevaContrasena = _passwordController.text;
+    String repetirContrasena = _repeatPasswordController.text;
 
+    // Validar que las contraseñas coincidan si se están modificando
+    if (nuevaContrasena.isNotEmpty || repetirContrasena.isNotEmpty) {
+      if (nuevaContrasena != repetirContrasena) {
+        // Las contraseñas no coinciden, puedes manejar esto según tu lógica
+        print('Las contraseñas no coinciden');
+        return;
+      }
+    }
+
+    // Obtener el ID del usuario actual
+    String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    // Validar que el ID del usuario no esté vacío
+    if (userId.isEmpty) {
+      print('Error: No se pudo obtener el ID del usuario actual.');
+      return;
+    }
+
+    // Actualizar el documento en Firestore
     try {
-      // Obtén la ID del usuario actual
-      String userId = FirebaseAuth.instance.currentUser!.uid;
-
-      // Actualiza el documento en Firestore
       await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(userId)
           .update({
         'nombreCompleto': nuevoNombreCompleto,
+        'correo': nuevoCorreo,
         'telefono': nuevoTelefono,
         'direccion': nuevaDireccion,
+        // Agregar la actualización de la contraseña si es necesario
       });
 
-      Navigator.pop(context); // Cierra la página de edición de perfil
+      // Una vez que hayas guardado los cambios, puedes navegar de nuevo a la página de Menú
+      Navigator.pop(context);
     } catch (error) {
       print('Error al actualizar el perfil: $error');
     }
@@ -82,6 +110,12 @@ class _EditarPerfilPageState extends State<EditarPerfilPage> {
             ),
             SizedBox(height: 10),
             TextField(
+              controller: _correoController,
+              decoration:
+                  InputDecoration(labelText: 'Nuevo Correo Electrónico'),
+            ),
+            SizedBox(height: 10),
+            TextField(
               controller: _telefonoController,
               decoration: InputDecoration(labelText: 'Nuevo Teléfono'),
             ),
@@ -89,6 +123,19 @@ class _EditarPerfilPageState extends State<EditarPerfilPage> {
             TextField(
               controller: _direccionController,
               decoration: InputDecoration(labelText: 'Nueva Dirección'),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(labelText: 'Nueva Contraseña'),
+              obscureText: true,
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _repeatPasswordController,
+              decoration:
+                  InputDecoration(labelText: 'Repetir Nueva Contraseña'),
+              obscureText: true,
             ),
             SizedBox(height: 20),
             ElevatedButton(
