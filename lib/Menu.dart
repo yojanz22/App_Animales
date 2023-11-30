@@ -65,6 +65,8 @@ class _MenuPageState extends State<MenuPage>
       ),
       body: TabBarView(
         controller: _tabController,
+        physics:
+            NeverScrollableScrollPhysics(), // Esto deshabilita el deslizamiento
         children: [
           GoogleMapPage(),
           MascotasPage(),
