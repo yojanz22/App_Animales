@@ -1,8 +1,9 @@
+import 'package:appanimales/AgregarMascota.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:appanimales/EditarPerfil.dart';
 import 'package:appanimales/GoogleMap.dart';
 import 'package:appanimales/Mascotas.dart';
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class MenuPage extends StatefulWidget {
@@ -26,7 +27,6 @@ class _MenuPageState extends State<MenuPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-
     cargarInformacionUsuario();
   }
 
@@ -39,8 +39,7 @@ class _MenuPageState extends State<MenuPage>
       if (userSnapshot.exists) {
         setState(() {
           nombreUsuario = userSnapshot['nombreUsuario'];
-          nombreCompleto =
-              userSnapshot['nombreCompleto'] ?? ''; // Agrega esta línea
+          nombreCompleto = userSnapshot['nombreCompleto'] ?? '';
           telefono = userSnapshot['telefono'] ?? '';
           direccion = userSnapshot['direccion'] ?? '';
         });
@@ -65,8 +64,7 @@ class _MenuPageState extends State<MenuPage>
       ),
       body: TabBarView(
         controller: _tabController,
-        physics:
-            NeverScrollableScrollPhysics(), // Esto deshabilita el deslizamiento
+        physics: NeverScrollableScrollPhysics(),
         children: [
           GoogleMapPage(),
           MascotasPage(),
@@ -111,6 +109,18 @@ class _MenuPageState extends State<MenuPage>
                       telefonoActual: telefono,
                       direccionActual: direccion,
                     ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Agregar Mascota'), // Nuevo botón "Agregar Mascota"
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AgregarMascotaPage(),
                   ),
                 );
               },
