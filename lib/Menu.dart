@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:appanimales/EditarPerfil.dart';
 import 'package:appanimales/GoogleMap.dart';
 import 'package:appanimales/Mascotas.dart';
+import 'package:appanimales/MisMascotas.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class MenuPage extends StatefulWidget {
@@ -121,6 +122,18 @@ class _MenuPageState extends State<MenuPage>
                   context,
                   MaterialPageRoute(
                     builder: (context) => AgregarMascotaPage(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Ver mis mascotas'), // Nuevo botón "Agregar Mascota"
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MisMascotasPage(),
                   ),
                 );
               },
