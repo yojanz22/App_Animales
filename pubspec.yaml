@@ -39,6 +39,8 @@ dependencies:
   firebase_analytics: ^10.7.2
   google_sign_in: ^6.1.6
   flutter_facebook_auth: ^6.0.3
+  image_picker: ^1.0.4
+  firebase_storage: ^11.5.3
 
   
   #Google Maps
