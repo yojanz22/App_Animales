@@ -1,3 +1,4 @@
+import 'package:appanimales/editarMascota.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -32,12 +33,27 @@ class _MisMascotasPageState extends State<MisMascotasPage> {
           var nombre = mascota['nombre'];
           var tipo = mascota['tipo'];
           var raza = mascota['raza'];
-          // Agrega más campos según sea necesario
+
+          var iconoMascota = tipo == 'Perro'
+              ? Image.asset('assets/perro.jpeg', width: 24, height: 24)
+              : Image.asset('assets/gato.jpeg', width: 24, height: 24);
 
           var mascotaWidget = ListTile(
+            leading: iconoMascota,
             title: Text(nombre),
             subtitle: Text('Tipo: $tipo - Raza: $raza'),
-            // Agrega más elementos según sea necesario
+            trailing: IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () {
+                // Navegar a la página de edición cuando se presiona el botón "Editar"
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditarMascotaPage(mascota: mascota),
+                  ),
+                );
+              },
+            ),
           );
 
           mascotasWidgets.add(mascotaWidget);
