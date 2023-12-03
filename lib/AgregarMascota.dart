@@ -43,13 +43,14 @@ class _AgregarMascotaPageState extends State<AgregarMascotaPage> {
         User? currentUser = _auth.currentUser;
 
         if (currentUser != null) {
-          // Obtener el ID del usuario actual
+          // Obtener el ID y nombre del usuario actual
           String userId = currentUser.uid;
+          String userName = currentUser.displayName ?? '';
 
           // Subir imagen a Firebase Storage y obtener la URL
           String imageUrl = await _subirImagen(userId);
 
-          // Agregar mascota a la base de datos con la URL de la imagen
+          // Agregar mascota a la base de datos con el nombre del dueño
           await _firestore.collection('mascotas').add({
             'nombre': _nombreMascotaController.text,
             'tipo': _tipoMascota,
@@ -58,7 +59,11 @@ class _AgregarMascotaPageState extends State<AgregarMascotaPage> {
             'peso': _pesoController.text,
             'descripcion': _descripcionController.text,
             'idUsuario': userId,
+            'nombreUsuario': userName,
             'imagen': imageUrl,
+            'perdida':
+                false, // Nuevo campo para indicar si la mascota está perdida
+
             // Otros campos de la mascota...
           });
 
@@ -171,6 +176,12 @@ class _AgregarMascotaPageState extends State<AgregarMascotaPage> {
                   children: [
                     TextFormField(
                       controller: _nombreMascotaController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingrese el nombre de la mascota';
+                        }
+                        return null;
+                      },
                       decoration:
                           InputDecoration(labelText: 'Nombre de la Mascota'),
                     ),
@@ -187,21 +198,45 @@ class _AgregarMascotaPageState extends State<AgregarMascotaPage> {
                     SizedBox(height: 10),
                     TextFormField(
                       controller: _razaController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingrese la raza de la mascota';
+                        }
+                        return null;
+                      },
                       decoration: InputDecoration(labelText: 'Raza'),
                     ),
                     SizedBox(height: 10),
                     TextFormField(
                       controller: _edadController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingrese la edad de la mascota';
+                        }
+                        return null;
+                      },
                       decoration: InputDecoration(labelText: 'Edad'),
                     ),
                     SizedBox(height: 10),
                     TextFormField(
                       controller: _pesoController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingrese el peso de la mascota';
+                        }
+                        return null;
+                      },
                       decoration: InputDecoration(labelText: 'Peso'),
                     ),
                     SizedBox(height: 10),
                     TextFormField(
                       controller: _descripcionController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingrese la descripción de la mascota';
+                        }
+                        return null;
+                      },
                       decoration: InputDecoration(labelText: 'Descripción'),
                     ),
                     SizedBox(height: 20),

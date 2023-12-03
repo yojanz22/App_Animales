@@ -1,8 +1,13 @@
 import 'package:appanimales/editarMascota.dart';
+import 'package:appanimales/formularioPerdida.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MisMascotasPage extends StatefulWidget {
+  final bool seleccionarPerdida;
+
+  MisMascotasPage({required this.seleccionarPerdida});
+
   @override
   _MisMascotasPageState createState() => _MisMascotasPageState();
 }
@@ -42,17 +47,39 @@ class _MisMascotasPageState extends State<MisMascotasPage> {
             leading: iconoMascota,
             title: Text(nombre),
             subtitle: Text('Tipo: $tipo - Raza: $raza'),
-            trailing: IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                // Navegar a la página de edición cuando se presiona el botón "Editar"
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditarMascotaPage(mascota: mascota),
+            tileColor: mascota['perdida'] ? Colors.red.withOpacity(0.3) : null,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Botón de Edición
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            EditarMascotaPage(mascota: mascota),
+                      ),
+                    );
+                  },
+                ),
+                // Botón de Eliminación
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    _mostrarDialogoConfirmacion(mascota);
+                  },
+                ),
+                // Botón para marcar como perdida
+                if (widget.seleccionarPerdida)
+                  IconButton(
+                    icon: Icon(Icons.warning),
+                    onPressed: () {
+                      _irAFormularioPerdida(mascota.id);
+                    },
                   ),
-                );
-              },
+              ],
             ),
           );
 
@@ -63,6 +90,46 @@ class _MisMascotasPageState extends State<MisMascotasPage> {
           children: mascotasWidgets,
         );
       },
+    );
+  }
+
+  Future<void> _mostrarDialogoConfirmacion(DocumentSnapshot mascota) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Eliminar Mascota'),
+          content: Text('¿Estás seguro de que quieres eliminar esta mascota?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Cerrar el diálogo
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                _eliminarMascota(mascota.id);
+                Navigator.of(context).pop(); // Cerrar el diálogo
+              },
+              child: Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _eliminarMascota(String mascotaId) {
+    FirebaseFirestore.instance.collection('mascotas').doc(mascotaId).delete();
+  }
+
+  void _irAFormularioPerdida(String mascotaId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FormularioPerdida(mascotaId: mascotaId),
+      ),
     );
   }
 }

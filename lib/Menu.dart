@@ -1,10 +1,11 @@
-import 'package:appanimales/AgregarMascota.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:appanimales/EditarPerfil.dart';
-import 'package:appanimales/GoogleMap.dart';
-import 'package:appanimales/Mascotas.dart';
-import 'package:appanimales/MisMascotas.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'editarMascota.dart';
+import 'AgregarMascota.dart';
+import 'MisMascotas.dart';
+import 'GoogleMap.dart';
+import 'Mascotas.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class MenuPage extends StatefulWidget {
@@ -27,7 +28,7 @@ class _MenuPageState extends State<MenuPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this)..addListener(() {});
     cargarInformacionUsuario();
   }
 
@@ -37,13 +38,24 @@ class _MenuPageState extends State<MenuPage>
           .collection('usuarios')
           .doc(widget.user?.uid)
           .get();
+
       if (userSnapshot.exists) {
-        setState(() {
-          nombreUsuario = userSnapshot['nombreUsuario'];
-          nombreCompleto = userSnapshot['nombreCompleto'] ?? '';
-          telefono = userSnapshot['telefono'] ?? '';
-          direccion = userSnapshot['direccion'] ?? '';
-        });
+        var data = userSnapshot.data() as Map<String, dynamic>;
+
+        if (data.containsKey('nombreUsuario')) {
+          setState(() {
+            nombreUsuario = data['nombreUsuario'];
+            nombreCompleto = data['nombreCompleto'] ?? '';
+            telefono = data['telefono'] ?? '';
+            direccion = data['direccion'] ?? '';
+          });
+        } else {
+          // Manejar el caso cuando el campo 'nombreUsuario' no está presente
+          print('El campo "nombreUsuario" no está presente en el documento.');
+        }
+      } else {
+        // Manejar el caso cuando el documento no existe
+        print('El documento no existe.');
       }
     } catch (error) {
       print('Error al cargar la información del usuario: $error');
@@ -54,7 +66,24 @@ class _MenuPageState extends State<MenuPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Menú Principal'),
+        title: Row(
+          children: [
+            Text('Menú Principal'),
+            SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        MisMascotasPage(seleccionarPerdida: true),
+                  ),
+                );
+              },
+              child: Text('Perdí mi Mascota'),
+            ),
+          ],
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -115,7 +144,7 @@ class _MenuPageState extends State<MenuPage>
               },
             ),
             ListTile(
-              title: Text('Agregar Mascota'), // Nuevo botón "Agregar Mascota"
+              title: Text('Agregar Mascota'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -127,13 +156,27 @@ class _MenuPageState extends State<MenuPage>
               },
             ),
             ListTile(
-              title: Text('Ver mis mascotas'), // Nuevo botón "Agregar Mascota"
+              title: Text('Ver mis mascotas'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MisMascotasPage(),
+                    builder: (context) =>
+                        MisMascotasPage(seleccionarPerdida: false),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Perdí mi Mascota'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        MisMascotasPage(seleccionarPerdida: true),
                   ),
                 );
               },

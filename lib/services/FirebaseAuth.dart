@@ -4,12 +4,19 @@ class FirebaseAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<String?> registerWithEmailAndPassword(
-      String email, String password) async {
+    String email,
+    String password,
+    String displayName, // Agrega el nombre del usuario
+  ) async {
     try {
       await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // Actualiza el nombre del usuario en la autenticación de Firebase
+      await _auth.currentUser?.updateDisplayName(displayName);
+
       return null; // Registro exitoso, devuelve null
     } on FirebaseAuthException catch (e) {
       return e
@@ -18,7 +25,9 @@ class FirebaseAuthService {
   }
 
   Future<String?> signInWithEmailAndPassword(
-      String email, String password) async {
+    String email,
+    String password,
+  ) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       return null; // Inicio de sesión exitoso, devuelve null
