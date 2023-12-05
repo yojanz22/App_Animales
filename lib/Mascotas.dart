@@ -1,3 +1,4 @@
+import 'package:appanimales/DetallesAnimalesPerdios.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -8,11 +9,11 @@ class MascotasPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Animales Perdidos'),
       ),
-      body: _buildPerdidosGrid(),
+      body: _buildPerdidosList(),
     );
   }
 
-  Widget _buildPerdidosGrid() {
+  Widget _buildPerdidosList() {
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('mascotas')
@@ -24,41 +25,62 @@ class MascotasPage extends StatelessWidget {
         }
 
         var mascotasPerdidas = snapshot.data?.docs;
-        return GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 8.0,
-            mainAxisSpacing: 8.0,
-          ),
+        return ListView.builder(
           itemCount: mascotasPerdidas!.length,
           itemBuilder: (context, index) {
             var mascota = mascotasPerdidas[index];
             var nombre = mascota['nombre'];
+            var ultimaUbicacion = mascota['ultimaDireccionVista'];
+            var horaPerdida = mascota['horaPerdida'];
+            var descripcion = mascota['descripcion'];
             var imageUrl = mascota['imagen'];
 
-            return _buildMascotaPerdidaCard(nombre, imageUrl);
+            return _buildMascotaPerdidaCard(
+              nombre,
+              ultimaUbicacion,
+              horaPerdida,
+              descripcion,
+              imageUrl,
+              context,
+            );
           },
         );
       },
     );
   }
 
-  Widget _buildMascotaPerdidaCard(String nombre, String imageUrl) {
+  Widget _buildMascotaPerdidaCard(
+    String nombre,
+    String ultimaUbicacion,
+    String horaPerdida,
+    String descripcion,
+    String imageUrl,
+    BuildContext context,
+  ) {
     return Card(
-      child: Column(
-        children: [
-          Image.network(
-            imageUrl,
-            width: 150,
-            height: 150,
-            fit: BoxFit.cover,
-          ),
-          SizedBox(height: 8.0),
-          Text(
-            nombre,
-            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-          ),
-        ],
+      child: ListTile(
+        leading: Image.network(
+          imageUrl,
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+        ),
+        title: Text(nombre),
+        subtitle: Text(ultimaUbicacion),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetallesAnimalesPerdidos(
+                nombre: nombre,
+                ultimaUbicacion: ultimaUbicacion,
+                horaPerdida: horaPerdida,
+                descripcion: descripcion,
+                imageUrl: imageUrl,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

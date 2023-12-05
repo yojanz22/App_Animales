@@ -1,7 +1,7 @@
-import 'package:appanimales/editarMascota.dart';
-import 'package:appanimales/formularioPerdida.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'editarMascota.dart';
+import 'formularioPerdida.dart';
 
 class MisMascotasPage extends StatefulWidget {
   final bool seleccionarPerdida;
@@ -79,6 +79,14 @@ class _MisMascotasPageState extends State<MisMascotasPage> {
                       _irAFormularioPerdida(mascota.id);
                     },
                   ),
+                // Botón para marcar como no perdida
+                if (widget.seleccionarPerdida)
+                  IconButton(
+                    icon: Icon(Icons.check),
+                    onPressed: () {
+                      _marcarComoNoPerdida(mascota.id);
+                    },
+                  ),
               ],
             ),
           );
@@ -131,5 +139,13 @@ class _MisMascotasPageState extends State<MisMascotasPage> {
         builder: (context) => FormularioPerdida(mascotaId: mascotaId),
       ),
     );
+  }
+
+  void _marcarComoNoPerdida(String mascotaId) {
+    FirebaseFirestore.instance
+        .collection('mascotas')
+        .doc(mascotaId)
+        .update({'perdida': false});
+    // Puedes agregar aquí lógica adicional si es necesario
   }
 }

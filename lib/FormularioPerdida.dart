@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:appanimales/services/SeleccionarUbicacionEnMapa.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class FormularioPerdida extends StatefulWidget {
   final String mascotaId; // Id de la mascota seleccionada
@@ -14,8 +16,11 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
   // Variables para almacenar la información del formulario
   late String horaPerdida;
   late String direccionPerdida;
-  late String ultimaDireccionVista;
   late String descripcionPerdida;
+
+  bool agregarDireccionManualmente = false;
+
+  LatLng? ubicacionSeleccionada;
 
   @override
   Widget build(BuildContext context) {
@@ -37,19 +42,33 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
               decoration: InputDecoration(labelText: 'Hora de pérdida'),
             ),
             SizedBox(height: 10),
-            TextField(
-              onChanged: (value) {
-                direccionPerdida = value;
-              },
-              decoration: InputDecoration(labelText: 'Dirección de pérdida'),
+            Row(
+              children: [
+                Checkbox(
+                  value: agregarDireccionManualmente,
+                  onChanged: (value) {
+                    setState(() {
+                      agregarDireccionManualmente = value!;
+                    });
+                  },
+                ),
+                Text('Agregar dirección manualmente'),
+              ],
             ),
-            SizedBox(height: 10),
-            TextField(
-              onChanged: (value) {
-                ultimaDireccionVista = value;
-              },
-              decoration: InputDecoration(labelText: 'Última dirección vista'),
-            ),
+            if (!agregarDireccionManualmente)
+              TextField(
+                onChanged: (value) {
+                  direccionPerdida = value;
+                },
+                decoration: InputDecoration(labelText: 'Dirección de pérdida'),
+              ),
+            if (agregarDireccionManualmente)
+              ElevatedButton(
+                onPressed: () {
+                  _seleccionarDireccionEnMapa();
+                },
+                child: Text('Seleccionar dirección en el mapa'),
+              ),
             SizedBox(height: 10),
             TextField(
               onChanged: (value) {
@@ -69,6 +88,23 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
         ),
       ),
     );
+  }
+
+  void _seleccionarDireccionEnMapa() async {
+    // Abre la pantalla para seleccionar la ubicación en el mapa
+    final LatLng? ubicacionSeleccionadaNueva = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SeleccionarUbicacionEnMapa(),
+      ),
+    );
+
+    // Actualiza la ubicación seleccionada si se elige una nueva
+    if (ubicacionSeleccionadaNueva != null) {
+      setState(() {
+        ubicacionSeleccionada = ubicacionSeleccionadaNueva;
+      });
+    }
   }
 
   void _generarAlerta() async {
@@ -95,9 +131,14 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
           await mascotaRef.update({
             'perdida': true,
             'horaPerdida': horaPerdida,
-            'direccionPerdida': direccionPerdida,
-            'ultimaDireccionVista': ultimaDireccionVista,
             'descripcionPerdida': descripcionPerdida,
+            if (!agregarDireccionManualmente)
+              'direccionPerdida': direccionPerdida,
+            if (ubicacionSeleccionada != null)
+              'ubicacionPerdida': {
+                'latitude': ubicacionSeleccionada!.latitude,
+                'longitude': ubicacionSeleccionada!.longitude,
+              },
           });
 
           // Mostrar un mensaje de éxito
