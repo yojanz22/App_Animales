@@ -11,8 +11,10 @@ class SeleccionarUbicacionEnMapa extends StatefulWidget {
 class _SeleccionarUbicacionEnMapaState
     extends State<SeleccionarUbicacionEnMapa> {
   GoogleMapController? mapController;
-  double latitud = 0.0;
-  double longitud = 0.0;
+  double latitud = -33.0246; // Latitud de Viña del Mar, Chile
+  double longitud = -71.5519; // Longitud de Viña del Mar, Chile
+
+  Set<Marker> markers = {}; // Lista de marcadores
 
   @override
   void initState() {
@@ -23,7 +25,8 @@ class _SeleccionarUbicacionEnMapaState
   Future<void> _centrarEnUbicacionActual() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+        desiredAccuracy: LocationAccuracy.high,
+      );
       setState(() {
         latitud = position.latitude;
         longitud = position.longitude;
@@ -39,24 +42,35 @@ class _SeleccionarUbicacionEnMapaState
       appBar: AppBar(
         title: Text('Seleccionar Ubicación en el Mapa'),
       ),
-      body: GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: LatLng(latitud, longitud),
-          zoom: 16.0,
-        ),
-        markers: {
-          Marker(
-            markerId: MarkerId('ubicacionSeleccionada'),
-            position: LatLng(latitud, longitud),
+      body: Stack(
+        children: [
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: LatLng(latitud, longitud),
+              zoom: 16.0,
+            ),
+            onTap: _agregarTarjetaUbicacion,
+            markers: markers,
+            myLocationEnabled: true, // Activar la ubicación del usuario
           ),
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _mostrarConfirmacion();
-        },
-        child: Icon(Icons.check),
+          Positioned(
+            bottom: 16.0,
+            left: 16.0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    _mostrarConfirmacion();
+                  },
+                  child: Text('Confirmar Ubicación'),
+                ),
+                SizedBox(height: 8.0),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -65,6 +79,26 @@ class _SeleccionarUbicacionEnMapaState
     setState(() {
       mapController = controller;
     });
+  }
+
+  void _agregarTarjetaUbicacion(LatLng ubicacion) {
+    setState(() {
+      markers.clear(); // Limpiar marcadores previos
+      markers.add(
+        Marker(
+          markerId: MarkerId('ubicacionSeleccionada'),
+          position: ubicacion,
+          infoWindow: InfoWindow(
+            title: 'Ubicación Seleccionada',
+            snippet: 'Arrastra para ajustar',
+          ),
+          draggable: true,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+      );
+    });
+
+    mapController?.animateCamera(CameraUpdate.newLatLng(ubicacion));
   }
 
   void _mostrarConfirmacion() {
@@ -91,8 +125,8 @@ class _SeleccionarUbicacionEnMapaState
         );
       },
     ).then((result) {
-      // Navegar de nuevo a FormularioPerdida con la ubicación seleccionada
       if (result != null) {
+        // Navegar a la página de FormularioPerdida con la ubicación seleccionada
         Navigator.pop(context, result);
       }
     });
