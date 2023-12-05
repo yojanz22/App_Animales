@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -10,6 +11,7 @@ class GoogleMapPage extends StatefulWidget {
 
 class _GoogleMapPageState extends State<GoogleMapPage> {
   late GoogleMapController mapController;
+  Set<Marker> markers = {};
 
   @override
   void initState() {
@@ -31,6 +33,10 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+
+      // Cargar animales perdidos al obtener la ubicación actual
+      await _loadLostAnimals();
+
       mapController.animateCamera(
         CameraUpdate.newLatLngZoom(
           LatLng(position.latitude, position.longitude),
@@ -39,6 +45,43 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
       );
     } catch (e) {
       print('Error obtaining location: $e');
+    }
+  }
+
+  _loadLostAnimals() async {
+    try {
+      // Recuperar animales perdidos de Firebase
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('mascotas')
+          .where('perdida', isEqualTo: true)
+          .get();
+
+      for (QueryDocumentSnapshot document in querySnapshot.docs) {
+        // Asegúrate de que la ubicacionPerdida esté presente en el documento
+        if (document['ubicacionPerdida'] != null) {
+          Map<String, dynamic> ubicacionPerdida = document['ubicacionPerdida'];
+          double latitude = ubicacionPerdida['latitude'];
+          double longitude = ubicacionPerdida['longitude'];
+
+          markers.add(
+            Marker(
+              markerId: MarkerId(document.id),
+              position: LatLng(latitude, longitude),
+              infoWindow: InfoWindow(
+                title: document['nombre'] ?? 'Animal Perdido',
+                snippet: document['descripcionPerdida'] ?? '',
+              ),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueRed),
+            ),
+          );
+        }
+      }
+
+      // Actualizar el estado para que se vuelva a dibujar el mapa con los nuevos marcadores
+      setState(() {});
+    } catch (e) {
+      print('Error loading lost animals: $e');
     }
   }
 
@@ -59,6 +102,7 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
             mapType: MapType.normal,
+            markers: markers,
           ),
           Positioned(
             top: 16.0,
