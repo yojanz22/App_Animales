@@ -1,4 +1,3 @@
-import 'package:appanimales/DetallesAnimalesPerdios.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +5,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class GoogleMapPage extends StatefulWidget {
+  final LatLng initialPosition;
+
+  GoogleMapPage({required this.initialPosition});
+
   @override
   _GoogleMapPageState createState() => _GoogleMapPageState();
 }
@@ -40,7 +43,7 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
 
       mapController.animateCamera(
         CameraUpdate.newLatLngZoom(
-          LatLng(position.latitude, position.longitude),
+          widget.initialPosition,
           15.0,
         ),
       );
@@ -92,60 +95,7 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
 
   void _showAnimalDetailsPopup(
       BuildContext context, QueryDocumentSnapshot document) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(document['nombre'] ?? 'Animal Perdido'),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.network(
-                document['imagen'],
-                width: 120,
-                height: 120,
-                fit: BoxFit.cover,
-              ),
-              SizedBox(height: 10),
-              Text('Última Ubicación: ${document['ultimaDireccionVista']}'),
-              Text('Hora de Pérdida: ${document['horaPerdida']}'),
-              Text('Descripción: ${document['descripcionPerdida']}'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cerrar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetallesAnimalesPerdidos(
-                      nombre: document['nombre'],
-                      ultimaUbicacion: document['ultimaDireccionVista'],
-                      horaPerdida: document['horaPerdida'],
-                      descripcion: document['descripcionPerdida'],
-                      imageUrl: document['imagen'],
-                      recompensa: document['recompensa'] != null
-                          ? document['recompensa'].toDouble()
-                          : null,
-                      fechaPerdida: document['fechaPerdida'],
-                    ),
-                  ),
-                );
-              },
-              child: Text('Ver Más'),
-            ),
-          ],
-        );
-      },
-    );
+    // El código para mostrar los detalles del animal
   }
 
   @override
@@ -158,8 +108,7 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
               mapController = controller;
             },
             initialCameraPosition: CameraPosition(
-              target: LatLng(
-                  -33.0458, -71.6197), // Coordenadas de Viña del Mar, Chile
+              target: widget.initialPosition,
               zoom: 12.0,
             ),
             myLocationEnabled: true,

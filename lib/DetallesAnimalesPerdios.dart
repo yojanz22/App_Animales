@@ -1,5 +1,9 @@
+// DetallesAnimalesPerdidos.dart
+
+import 'package:appanimales/GoogleMap.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Importa el paquete intl para formatear la fecha
+import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class DetallesAnimalesPerdidos extends StatelessWidget {
   final String nombre;
@@ -68,7 +72,7 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // Agrega aquí la lógica para manejar el botón de última ubicación
+                      _mostrarEnMapa(context);
                     },
                     child: Text('Mostrar en el Mapa'),
                   ),
@@ -83,12 +87,9 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
 
   String _formatHoraPerdida() {
     try {
-      // Analiza la horaPerdida en un objeto DateTime
       DateTime parsedTime = DateFormat.jm().parse(horaPerdida);
-      // Formatea la horaPerdida en un nuevo formato deseado
       return DateFormat('hh:mm a').format(parsedTime);
     } catch (e) {
-      // Si hay un error al analizar la hora, devuelve la hora original
       return horaPerdida;
     }
   }
@@ -138,6 +139,18 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  void _mostrarEnMapa(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GoogleMapPage(
+          initialPosition:
+              LatLng(-33.0319433, -71.5440022), // Coordenadas de ejemplo
+        ),
+      ),
     );
   }
 }

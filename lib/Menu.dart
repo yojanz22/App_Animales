@@ -1,6 +1,7 @@
 import 'package:appanimales/EditarPerfil.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'editarMascota.dart';
 import 'AgregarMascota.dart';
 import 'MisMascotas.dart';
@@ -96,7 +97,7 @@ class _MenuPageState extends State<MenuPage>
         controller: _tabController,
         physics: NeverScrollableScrollPhysics(),
         children: [
-          GoogleMapPage(),
+          GoogleMapPage(initialPosition: LatLng(-33.0458, -71.6197)),
           MascotasPage(),
         ],
       ),
