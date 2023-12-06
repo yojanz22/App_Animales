@@ -76,7 +76,8 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
                 },
               ),
               icon: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueRed),
+                BitmapDescriptor.hueRed,
+              ),
             ),
           );
         }
@@ -131,6 +132,10 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
                       horaPerdida: document['horaPerdida'],
                       descripcion: document['descripcionPerdida'],
                       imageUrl: document['imagen'],
+                      recompensa: document['recompensa'] != null
+                          ? document['recompensa'].toDouble()
+                          : null,
+                      fechaPerdida: document['fechaPerdida'],
                     ),
                   ),
                 );

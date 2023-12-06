@@ -42,6 +42,7 @@ class MascotasPage extends StatelessWidget {
               descripcion,
               imageUrl,
               context,
+              mascota,
             );
           },
         );
@@ -56,7 +57,12 @@ class MascotasPage extends StatelessWidget {
     String descripcion,
     String imageUrl,
     BuildContext context,
+    DocumentSnapshot mascota,
   ) {
+    bool tieneRecompensa = mascota['recompensa'] != null;
+    double? recompensa =
+        tieneRecompensa ? mascota['recompensa'].toDouble() : null;
+
     return Card(
       child: ListTile(
         leading: Image.network(
@@ -66,7 +72,26 @@ class MascotasPage extends StatelessWidget {
           fit: BoxFit.cover,
         ),
         title: Text(nombre),
-        subtitle: Text(ultimaUbicacion),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(ultimaUbicacion),
+            Text('Hora de pérdida: $horaPerdida'),
+            Text('Descripción: $descripcion'),
+            if (tieneRecompensa)
+              Container(
+                color: Colors.amber,
+                padding: EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.attach_money),
+                    SizedBox(width: 5),
+                    Text('Recompensa: \$${recompensa.toString()}'),
+                  ],
+                ),
+              ),
+          ],
+        ),
         onTap: () {
           Navigator.push(
             context,
@@ -77,6 +102,8 @@ class MascotasPage extends StatelessWidget {
                 horaPerdida: horaPerdida,
                 descripcion: descripcion,
                 imageUrl: imageUrl,
+                recompensa: recompensa,
+                fechaPerdida: mascota['fechaPerdida'],
               ),
             ),
           );

@@ -1,7 +1,8 @@
-import 'package:appanimales/SeleccionarUbicacionEnMapa.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:appanimales/SeleccionarUbicacionEnMapa.dart';
+import 'package:intl/intl.dart';
 
 class FormularioPerdida extends StatefulWidget {
   final String mascotaId; // Id de la mascota seleccionada
@@ -13,14 +14,14 @@ class FormularioPerdida extends StatefulWidget {
 }
 
 class _FormularioPerdidaState extends State<FormularioPerdida> {
-  // Variables para almacenar la información del formulario
   late String horaPerdida;
   late String direccionPerdida;
   late String descripcionPerdida;
-
   bool agregarDireccionManualmente = false;
-
   LatLng? ubicacionSeleccionada;
+  bool agregarRecompensa = false;
+  double? cantidadRecompensa;
+  DateTime? fechaPerdida;
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +36,34 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
           children: [
             Text('Complete el formulario de pérdida:'),
             SizedBox(height: 10),
-            TextField(
-              onChanged: (value) {
-                horaPerdida = value;
-              },
-              decoration: InputDecoration(labelText: 'Hora de pérdida'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Botón para seleccionar la fecha
+                ElevatedButton(
+                  onPressed: () async {
+                    final selectedDate = await _seleccionarFecha(context);
+                    if (selectedDate != null) {
+                      setState(() {
+                        fechaPerdida = selectedDate;
+                      });
+                    }
+                  },
+                  child: Text('Fecha de Pérdida'),
+                ),
+                // Botón para seleccionar la hora
+                ElevatedButton(
+                  onPressed: () async {
+                    final selectedTime = await _seleccionarHora(context);
+                    if (selectedTime != null) {
+                      setState(() {
+                        horaPerdida = selectedTime;
+                      });
+                    }
+                  },
+                  child: Text('Hora de Pérdida'),
+                ),
+              ],
             ),
             SizedBox(height: 10),
             Row(
@@ -78,6 +102,31 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
                   InputDecoration(labelText: 'Descripción de la pérdida'),
             ),
             SizedBox(height: 20),
+            // Checkbox para agregar recompensa
+            Row(
+              children: [
+                Checkbox(
+                  value: agregarRecompensa,
+                  onChanged: (value) {
+                    setState(() {
+                      agregarRecompensa = value!;
+                    });
+                  },
+                ),
+                Text('Agregar recompensa'),
+              ],
+            ),
+            // Campo para ingresar la cantidad de la recompensa
+            if (agregarRecompensa)
+              TextField(
+                onChanged: (value) {
+                  cantidadRecompensa = double.tryParse(value);
+                },
+                keyboardType: TextInputType.number,
+                decoration:
+                    InputDecoration(labelText: 'Cantidad de recompensa'),
+              ),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 _generarAlerta();
@@ -91,7 +140,6 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
   }
 
   void _seleccionarDireccionEnMapa() async {
-    // Abre la pantalla para seleccionar la ubicación en el mapa
     final LatLng? ubicacionSeleccionadaNueva = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -99,7 +147,6 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
       ),
     );
 
-    // Actualiza la ubicación seleccionada si se elige una nueva
     if (ubicacionSeleccionadaNueva != null) {
       setState(() {
         ubicacionSeleccionada = ubicacionSeleccionadaNueva;
@@ -109,17 +156,13 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
 
   void _generarAlerta() async {
     try {
-      // Obtener la referencia de la mascota en Firestore
       DocumentReference mascotaRef = FirebaseFirestore.instance
           .collection('mascotas')
           .doc(widget.mascotaId);
 
-      // Obtener la información actual de la mascota
       DocumentSnapshot mascotaSnapshot = await mascotaRef.get();
       if (mascotaSnapshot.exists) {
-        // Verificar si la mascota ya está marcada como perdida
         if (mascotaSnapshot['perdida'] == true) {
-          // Mostrar un mensaje indicando que la mascota ya está marcada como perdida
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Esta mascota ya está marcada como perdida.'),
@@ -127,7 +170,6 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
             ),
           );
         } else {
-          // Actualizar la información de la mascota con el estado de "perdida" y la información del formulario
           await mascotaRef.update({
             'perdida': true,
             'horaPerdida': horaPerdida,
@@ -139,9 +181,12 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
                 'latitude': ubicacionSeleccionada!.latitude,
                 'longitude': ubicacionSeleccionada!.longitude,
               },
+            'recompensa': agregarRecompensa ? cantidadRecompensa : null,
+            'fechaPerdida': fechaPerdida != null
+                ? DateFormat('yyyy-MM-dd').format(fechaPerdida!)
+                : null,
           });
 
-          // Mostrar un mensaje de éxito
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Alerta generada correctamente.'),
@@ -149,13 +194,33 @@ class _FormularioPerdidaState extends State<FormularioPerdida> {
             ),
           );
 
-          // Navegar de nuevo a la página de MisMascotasPage
           Navigator.pop(context);
         }
       }
     } catch (error) {
-      // Manejar errores
       print('Error al generar la alerta: $error');
     }
+  }
+
+  Future<DateTime?> _seleccionarFecha(BuildContext context) async {
+    return showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+  }
+
+  Future<String?> _seleccionarHora(BuildContext context) async {
+    TimeOfDay? selectedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (selectedTime != null) {
+      return selectedTime.format(context);
+    }
+
+    return null;
   }
 }
