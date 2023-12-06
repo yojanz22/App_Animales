@@ -16,6 +16,7 @@ class GoogleMapPage extends StatefulWidget {
 class _GoogleMapPageState extends State<GoogleMapPage> {
   late GoogleMapController mapController;
   Set<Marker> markers = {};
+  Position? currentPosition;
 
   @override
   void initState() {
@@ -38,12 +39,15 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Cargar animales perdidos al obtener la ubicación actual
+      setState(() {
+        currentPosition = position;
+      });
+
       await _loadLostAnimals();
 
       mapController.animateCamera(
         CameraUpdate.newLatLngZoom(
-          widget.initialPosition,
+          LatLng(position.latitude, position.longitude),
           15.0,
         ),
       );
@@ -54,14 +58,12 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
 
   _loadLostAnimals() async {
     try {
-      // Recuperar animales perdidos de Firebase
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('mascotas')
           .where('perdida', isEqualTo: true)
           .get();
 
       for (QueryDocumentSnapshot document in querySnapshot.docs) {
-        // Asegúrate de que la ubicacionPerdida esté presente en el documento
         if (document['ubicacionPerdida'] != null) {
           Map<String, dynamic> ubicacionPerdida = document['ubicacionPerdida'];
           double latitude = ubicacionPerdida['latitude'];
@@ -86,7 +88,6 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
         }
       }
 
-      // Actualizar el estado para que se vuelva a dibujar el mapa con los nuevos marcadores
       setState(() {});
     } catch (e) {
       print('Error loading lost animals: $e');
@@ -119,9 +120,29 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
           Positioned(
             top: 16.0,
             right: 16.0,
-            child: FloatingActionButton(
-              onPressed: _checkAndRequestLocationPermissions,
-              child: Icon(Icons.my_location),
+            child: Column(
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    if (currentPosition != null) {
+                      mapController.animateCamera(
+                        CameraUpdate.newLatLng(
+                          LatLng(
+                            currentPosition!.latitude,
+                            currentPosition!.longitude,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: Icon(Icons.my_location),
+                ),
+                SizedBox(height: 16.0),
+                FloatingActionButton(
+                  onPressed: _checkAndRequestLocationPermissions,
+                  child: Icon(Icons.refresh),
+                ),
+              ],
             ),
           ),
         ],
