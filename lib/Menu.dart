@@ -1,4 +1,5 @@
 import 'package:appanimales/EditarPerfil.dart';
+import 'package:appanimales/buzon.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -140,6 +141,18 @@ class _MenuPageState extends State<MenuPage>
                       telefonoActual: telefono,
                       direccionActual: direccion,
                     ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Ir a Buzón'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BuzonPage(),
                   ),
                 );
               },
