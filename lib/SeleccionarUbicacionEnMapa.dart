@@ -117,7 +117,9 @@ class _SeleccionarUbicacionEnMapaState
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context, LatLng(latitud, longitud));
+                // Usar la posición del primer marcador
+                Navigator.pop(context,
+                    markers.isNotEmpty ? markers.first.position : null);
               },
               child: Text('Sí'),
             ),
