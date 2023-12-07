@@ -28,12 +28,17 @@ class MascotasPage extends StatelessWidget {
         return ListView.builder(
           itemCount: mascotasPerdidas!.length,
           itemBuilder: (context, index) {
-            var mascota = mascotasPerdidas[index];
-            var nombre = mascota['nombre'];
-            var ultimaUbicacion = mascota['ultimaDireccionVista'];
-            var horaPerdida = mascota['horaPerdida'];
-            var descripcion = mascota['descripcion'];
-            var imageUrl = mascota['imagen'];
+            var mascota = mascotasPerdidas[index].data();
+            var nombre =
+                mascota?['nombre'] as String? ?? 'Nombre no disponible';
+            var ultimaUbicacion = mascota?['ultimaDireccionVista'] as String? ??
+                'Ubicación no disponible';
+            var horaPerdida =
+                mascota?['horaPerdida'] as String? ?? 'Hora no disponible';
+            var descripcion = mascota?['descripcion'] as String? ??
+                'Descripción no disponible';
+            var imageUrl = mascota?['imagen'] as String? ??
+                ''; // Puedes manejar la falta de imagen según tu lógica.
 
             return _buildMascotaPerdidaCard(
               nombre,
@@ -42,7 +47,7 @@ class MascotasPage extends StatelessWidget {
               descripcion,
               imageUrl,
               context,
-              mascota,
+              mascotasPerdidas[index],
             );
           },
         );
@@ -60,8 +65,8 @@ class MascotasPage extends StatelessWidget {
     DocumentSnapshot mascota,
   ) {
     bool tieneRecompensa = mascota['recompensa'] != null;
-    double? recompensa =
-        tieneRecompensa ? mascota['recompensa'].toDouble() : null;
+    double recompensa =
+        tieneRecompensa ? (mascota['recompensa'] as num).toDouble() : 0.0;
 
     return Card(
       child: ListTile(
@@ -103,7 +108,8 @@ class MascotasPage extends StatelessWidget {
                 descripcion: descripcion,
                 imageUrl: imageUrl,
                 recompensa: recompensa,
-                fechaPerdida: mascota['fechaPerdida'],
+                fechaPerdida:
+                    mascota['fechaPerdida'] as String? ?? 'Fecha no disponible',
               ),
             ),
           );

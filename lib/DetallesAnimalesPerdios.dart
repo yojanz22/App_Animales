@@ -1,9 +1,7 @@
-// DetallesAnimalesPerdidos.dart
-
-import 'package:appanimales/GoogleMap.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'GoogleMap.dart'; // Importa tu archivo GoogleMap.dart aquí
 
 class DetallesAnimalesPerdidos extends StatelessWidget {
   final String nombre;
@@ -128,7 +126,8 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
         return AlertDialog(
           title: Text('Contactar al Dueño'),
           content: Text(
-              'Puedes contactar al dueño del animal a través de la aplicación.'),
+            'Puedes contactar al dueño del animal a través de la aplicación.',
+          ),
           actions: [
             TextButton(
               onPressed: () {
