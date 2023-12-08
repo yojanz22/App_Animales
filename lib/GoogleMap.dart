@@ -17,6 +17,7 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
   late GoogleMapController mapController;
   Set<Marker> markers = {};
   Position? currentPosition;
+  double radioSeleccionado = 200.0;
 
   @override
   void initState() {
@@ -58,7 +59,7 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
 
   _loadLostAnimals() async {
     try {
-      markers.clear(); // Limpia los marcadores existentes
+      markers.clear();
 
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -79,7 +80,6 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
           double latitude = ubicacionPerdida['latitude'];
           double longitude = ubicacionPerdida['longitude'];
 
-          // Calcula la distancia entre la ubicación actual y la ubicación del animal
           double distancia = await Geolocator.distanceBetween(
             position.latitude,
             position.longitude,
@@ -87,8 +87,7 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
             longitude,
           );
 
-          // Solo agrega el marcador si la distancia es menor o igual a 200 metros
-          if (distancia <= 200.0) {
+          if (distancia <= radioSeleccionado) {
             markers.add(
               Marker(
                 markerId: MarkerId(document.id),
@@ -134,34 +133,43 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
               zoom: 12.0,
             ),
             myLocationEnabled: true,
-            myLocationButtonEnabled: false,
+            myLocationButtonEnabled: true,
             mapType: MapType.normal,
             markers: markers,
           ),
           Positioned(
-            top: 16.0,
-            right: 16.0,
-            child: Column(
+            top: 8.0,
+            left: 8.0,
+            child: Row(
               children: [
-                FloatingActionButton(
+                ElevatedButton(
                   onPressed: () {
-                    if (currentPosition != null) {
-                      mapController.animateCamera(
-                        CameraUpdate.newLatLng(
-                          LatLng(
-                            currentPosition!.latitude,
-                            currentPosition!.longitude,
-                          ),
-                        ),
-                      );
-                    }
+                    setState(() {
+                      radioSeleccionado = 200.0;
+                    });
+                    _loadLostAnimals();
                   },
-                  child: Icon(Icons.my_location),
+                  child: Text('200m'),
                 ),
-                SizedBox(height: 16.0),
-                FloatingActionButton(
-                  onPressed: _checkAndRequestLocationPermissions,
-                  child: Icon(Icons.refresh),
+                SizedBox(width: 8.0),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      radioSeleccionado = 500.0;
+                    });
+                    _loadLostAnimals();
+                  },
+                  child: Text('500m'),
+                ),
+                SizedBox(width: 8.0),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      radioSeleccionado = double.infinity;
+                    });
+                    _loadLostAnimals();
+                  },
+                  child: Text('Ver Todos'),
                 ),
               ],
             ),
