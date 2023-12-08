@@ -58,6 +58,16 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
 
   _loadLostAnimals() async {
     try {
+      markers.clear(); // Limpia los marcadores existentes
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        currentPosition = position;
+      });
+
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('mascotas')
           .where('perdida', isEqualTo: true)
@@ -69,22 +79,33 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
           double latitude = ubicacionPerdida['latitude'];
           double longitude = ubicacionPerdida['longitude'];
 
-          markers.add(
-            Marker(
-              markerId: MarkerId(document.id),
-              position: LatLng(latitude, longitude),
-              infoWindow: InfoWindow(
-                title: document['nombre'] ?? 'Animal Perdido',
-                snippet: document['descripcionPerdida'] ?? '',
-                onTap: () {
-                  _showAnimalDetailsPopup(context, document);
-                },
-              ),
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                BitmapDescriptor.hueRed,
-              ),
-            ),
+          // Calcula la distancia entre la ubicación actual y la ubicación del animal
+          double distancia = await Geolocator.distanceBetween(
+            position.latitude,
+            position.longitude,
+            latitude,
+            longitude,
           );
+
+          // Solo agrega el marcador si la distancia es menor o igual a 200 metros
+          if (distancia <= 200.0) {
+            markers.add(
+              Marker(
+                markerId: MarkerId(document.id),
+                position: LatLng(latitude, longitude),
+                infoWindow: InfoWindow(
+                  title: document['nombre'] ?? 'Animal Perdido',
+                  snippet: document['descripcionPerdida'] ?? '',
+                  onTap: () {
+                    _showAnimalDetailsPopup(context, document);
+                  },
+                ),
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueRed,
+                ),
+              ),
+            );
+          }
         }
       }
 
