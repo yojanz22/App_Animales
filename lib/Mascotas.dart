@@ -24,12 +24,24 @@ class _MascotasPageState extends State<MascotasPage> {
             children: [
               _buildFiltroTipoAnimal(),
               _buildFiltroFecha(),
-              ElevatedButton(
-                onPressed: () {
-                  _aplicarFiltros();
-                  Navigator.pop(context);
-                },
-                child: Text('Aplicar Filtros'),
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      _limpiarFiltros();
+                      Navigator.pop(context);
+                    },
+                    child: Text('Limpiar Filtros'),
+                  ),
+                  SizedBox(width: 8.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      _aplicarFiltros();
+                      Navigator.pop(context);
+                    },
+                    child: Text('Aplicar Filtros'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -81,6 +93,13 @@ class _MascotasPageState extends State<MascotasPage> {
         ),
       ],
     );
+  }
+
+  void _limpiarFiltros() {
+    setState(() {
+      tipoSeleccionado = 'Todos';
+      fechaSeleccionada = null;
+    });
   }
 
   void _aplicarFiltros() {
@@ -192,8 +211,8 @@ class _MascotasPageState extends State<MascotasPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(ultimaUbicacion),
-            Text('Fecha de pérdida: $fechaPerdida'),
             Text('Hora de pérdida: $horaPerdida'),
+            Text('Fecha de pérdida: $fechaPerdida'),
             Text('Descripción: $descripcion'),
             if (tieneRecompensa)
               Container(
@@ -215,7 +234,7 @@ class _MascotasPageState extends State<MascotasPage> {
             MaterialPageRoute(
               builder: (context) => DetallesAnimalesPerdidos(
                 ubicacionPerdida: mascota[
-                    'ubicacionPerdida'], // Proporciona el nombre correcto del campo de tu dato Firestore
+                    'ubicacionPerdida'], // Proporciona el nombre correcto del campo de tu Firestore
                 nombre: nombre,
                 ultimaUbicacion: ultimaUbicacion,
                 horaPerdida: horaPerdida,
