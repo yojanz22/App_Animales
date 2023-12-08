@@ -2,12 +2,106 @@ import 'package:appanimales/DetallesAnimalesPerdios.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class MascotasPage extends StatelessWidget {
+class MascotasPage extends StatefulWidget {
+  @override
+  _MascotasPageState createState() => _MascotasPageState();
+}
+
+class _MascotasPageState extends State<MascotasPage> {
+  List<String> tiposAnimales = ['Todos', 'Perro', 'Gato'];
+  String tipoSeleccionado = 'Todos';
+  DateTime? fechaSeleccionada;
+
+  void _mostrarMenuFiltros(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildFiltroTipoAnimal(),
+              _buildFiltroFecha(),
+              ElevatedButton(
+                onPressed: () {
+                  _aplicarFiltros();
+                  Navigator.pop(context);
+                },
+                child: Text('Aplicar Filtros'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFiltroTipoAnimal() {
+    return DropdownButton<String>(
+      value: tipoSeleccionado,
+      items: tiposAnimales.map((tipo) {
+        return DropdownMenuItem<String>(
+          value: tipo,
+          child: Text(tipo),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          tipoSeleccionado = value!;
+        });
+      },
+    );
+  }
+
+  Widget _buildFiltroFecha() {
+    return Row(
+      children: [
+        Text('Fecha de Pérdida: '),
+        TextButton(
+          onPressed: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime.now(),
+            );
+            if (pickedDate != null && pickedDate != fechaSeleccionada) {
+              setState(() {
+                fechaSeleccionada = pickedDate;
+              });
+            }
+          },
+          child: Text(
+            fechaSeleccionada != null
+                ? '${fechaSeleccionada!.day}/${fechaSeleccionada!.month}/${fechaSeleccionada!.year}'
+                : 'Seleccione',
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _aplicarFiltros() {
+    // Implementa la lógica para aplicar los filtros a tu consulta Firestore
+    // Consulta Firestore con los filtros seleccionados (tipoSeleccionado, distancia, fecha, hora).
+    // Puedes usar estos valores en la consulta Firestore para filtrar los resultados.
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Animales Perdidos'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              _mostrarMenuFiltros(context);
+            },
+            icon: Icon(Icons.filter_list),
+          ),
+        ],
       ),
       body: _buildPerdidosList(),
     );
@@ -31,19 +125,35 @@ class MascotasPage extends StatelessWidget {
             var mascota = mascotasPerdidas[index].data();
             var nombre =
                 mascota?['nombre'] as String? ?? 'Nombre no disponible';
+            var tipo = mascota?['tipo'] as String? ?? 'Tipo no disponible';
             var ultimaUbicacion = mascota?['ultimaDireccionVista'] as String? ??
                 'Ubicación no disponible';
             var horaPerdida =
                 mascota?['horaPerdida'] as String? ?? 'Hora no disponible';
+            var fechaPerdida =
+                mascota?['fechaPerdida'] as String? ?? 'Fecha no disponible';
             var descripcion = mascota?['descripcion'] as String? ??
                 'Descripción no disponible';
-            var imageUrl = mascota?['imagen'] as String? ??
-                ''; // Puedes manejar la falta de imagen según tu lógica.
+            var imageUrl = mascota?['imagen'] as String? ?? '';
+
+            // Aplicar filtros
+            if (tipoSeleccionado != 'Todos' && tipoSeleccionado != tipo) {
+              return Container(); // Si el tipo no coincide, no mostramos el elemento
+            }
+
+            if (fechaSeleccionada != null) {
+              // Convierte la fecha almacenada en Firestore a DateTime
+              DateTime fechaMascota = DateTime.parse(fechaPerdida);
+              if (fechaMascota != fechaSeleccionada) {
+                return Container(); // Si la fecha no coincide, no mostramos el elemento
+              }
+            }
 
             return _buildMascotaPerdidaCard(
               nombre,
               ultimaUbicacion,
               horaPerdida,
+              fechaPerdida,
               descripcion,
               imageUrl,
               context,
@@ -59,6 +169,7 @@ class MascotasPage extends StatelessWidget {
     String nombre,
     String ultimaUbicacion,
     String horaPerdida,
+    String fechaPerdida,
     String descripcion,
     String imageUrl,
     BuildContext context,
@@ -81,6 +192,7 @@ class MascotasPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(ultimaUbicacion),
+            Text('Fecha de pérdida: $fechaPerdida'),
             Text('Hora de pérdida: $horaPerdida'),
             Text('Descripción: $descripcion'),
             if (tieneRecompensa)
@@ -103,12 +215,11 @@ class MascotasPage extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => DetallesAnimalesPerdidos(
                 ubicacionPerdida: mascota[
-                    'ubicacionPerdida'], // Provide the correct field name from your Firestore data
+                    'ubicacionPerdida'], // Proporciona el nombre correcto del campo de tu dato Firestore
                 nombre: nombre,
                 ultimaUbicacion: ultimaUbicacion,
                 horaPerdida: horaPerdida,
-                fechaPerdida:
-                    mascota['fechaPerdida'] as String? ?? 'Fecha no disponible',
+                fechaPerdida: fechaPerdida,
                 descripcion: descripcion,
                 imageUrl: imageUrl,
                 recompensa: recompensa,
