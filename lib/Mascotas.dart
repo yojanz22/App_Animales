@@ -102,14 +102,16 @@ class MascotasPage extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => DetallesAnimalesPerdidos(
+                ubicacionPerdida: mascota[
+                    'ubicacionPerdida'], // Provide the correct field name from your Firestore data
                 nombre: nombre,
                 ultimaUbicacion: ultimaUbicacion,
                 horaPerdida: horaPerdida,
+                fechaPerdida:
+                    mascota['fechaPerdida'] as String? ?? 'Fecha no disponible',
                 descripcion: descripcion,
                 imageUrl: imageUrl,
                 recompensa: recompensa,
-                fechaPerdida:
-                    mascota['fechaPerdida'] as String? ?? 'Fecha no disponible',
               ),
             ),
           );

@@ -1,9 +1,11 @@
+import 'package:appanimales/MapaGoogleUnico.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'GoogleMap.dart'; // Importa tu archivo GoogleMap.dart aquí
 
-class DetallesAnimalesPerdidos extends StatelessWidget {
+class DetallesAnimalesPerdidos extends StatefulWidget {
+  final Map<String, dynamic> ubicacionPerdida;
   final String nombre;
   final String ultimaUbicacion;
   final String horaPerdida;
@@ -13,6 +15,7 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
   final double? recompensa;
 
   DetallesAnimalesPerdidos({
+    required this.ubicacionPerdida,
     required this.nombre,
     required this.ultimaUbicacion,
     required this.horaPerdida,
@@ -23,11 +26,17 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
   });
 
   @override
+  _DetallesAnimalesPerdidosState createState() =>
+      _DetallesAnimalesPerdidosState();
+}
+
+class _DetallesAnimalesPerdidosState extends State<DetallesAnimalesPerdidos> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          nombre,
+          widget.nombre,
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
@@ -40,22 +49,22 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    nombre,
+                    widget.nombre,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   SizedBox(height: 10),
-                  Image.network(imageUrl, width: 150, height: 150),
+                  Image.network(widget.imageUrl, width: 150, height: 150),
                 ],
               ),
             ),
             SizedBox(height: 10),
             _buildDetalle('Hora de Pérdida', _formatHoraPerdida()),
-            _buildDetalle('Fecha de Pérdida', fechaPerdida),
-            _buildDetalle('Última Ubicación', ultimaUbicacion),
-            _buildDetalle('Descripción', descripcion),
+            _buildDetalle('Fecha de Pérdida', widget.fechaPerdida),
+            _buildDetalle('Última Ubicación', widget.ultimaUbicacion),
+            _buildDetalle('Descripción', widget.descripcion),
             _buildRecompensa(),
             SizedBox(height: 20),
             ElevatedButton(
@@ -85,10 +94,10 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
 
   String _formatHoraPerdida() {
     try {
-      DateTime parsedTime = DateFormat.jm().parse(horaPerdida);
+      DateTime parsedTime = DateFormat.jm().parse(widget.horaPerdida);
       return DateFormat('hh:mm a').format(parsedTime);
     } catch (e) {
-      return horaPerdida;
+      return widget.horaPerdida;
     }
   }
 
@@ -104,7 +113,7 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
   }
 
   Widget _buildRecompensa() {
-    return recompensa != null
+    return widget.recompensa != null
         ? Container(
             color: Colors.amber,
             padding: EdgeInsets.all(8.0),
@@ -112,7 +121,7 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
               children: [
                 Icon(Icons.attach_money),
                 SizedBox(width: 5),
-                Text('Recompensa: \$${recompensa!.toString()}'),
+                Text('Recompensa: \$${widget.recompensa!.toString()}'),
               ],
             ),
           )
@@ -142,12 +151,14 @@ class DetallesAnimalesPerdidos extends StatelessWidget {
   }
 
   void _mostrarEnMapa(BuildContext context) {
+    double latitude = widget.ubicacionPerdida['latitude'];
+    double longitude = widget.ubicacionPerdida['longitude'];
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => GoogleMapPage(
-          initialPosition:
-              LatLng(-33.0319433, -71.5440022), // Coordenadas de ejemplo
+        builder: (context) => MapaGoogleUnico(
+          ubicacion: LatLng(latitude, longitude),
         ),
       ),
     );
