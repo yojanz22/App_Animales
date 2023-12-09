@@ -18,6 +18,7 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
   Set<Marker> markers = {};
   Position? currentPosition;
   double radioSeleccionado = 200.0;
+  String tipoSeleccionado = 'Todos';
 
   @override
   void initState() {
@@ -87,7 +88,9 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
             longitude,
           );
 
-          if (distancia <= radioSeleccionado) {
+          if (distancia <= radioSeleccionado &&
+              (tipoSeleccionado == 'Todos' ||
+                  document['tipo'] == tipoSeleccionado)) {
             markers.add(
               Marker(
                 markerId: MarkerId(document.id),
@@ -170,6 +173,33 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
                     _loadLostAnimals();
                   },
                   child: Text('Ver Todos'),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 60.0,
+            left: 8.0,
+            child: DropdownButton<String>(
+              value: tipoSeleccionado,
+              onChanged: (value) {
+                setState(() {
+                  tipoSeleccionado = value!;
+                });
+                _loadLostAnimals();
+              },
+              items: [
+                DropdownMenuItem(
+                  value: 'Todos',
+                  child: Text('Todos'),
+                ),
+                DropdownMenuItem(
+                  value: 'Perro',
+                  child: Text('Perro'),
+                ),
+                DropdownMenuItem(
+                  value: 'Gato',
+                  child: Text('Gato'),
                 ),
               ],
             ),
