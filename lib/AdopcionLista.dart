@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'detalles_de_adopcion.dart'; // Asegúrate de importar el archivo detalles_de_adopcion.dart
+import 'detalles_de_adopcion.dart'; // Asegúrate de importar el archivo de detalles
 
 class ListaAnimalesAdopcion extends StatelessWidget {
   @override
@@ -9,8 +9,7 @@ class ListaAnimalesAdopcion extends StatelessWidget {
       appBar: AppBar(
         title: Text('Lista de Animales en Adopción'),
       ),
-      body: _buildListaAnimales(
-          context), // Pasa el contexto a _buildListaAnimales
+      body: _buildListaAnimales(context),
     );
   }
 
@@ -45,7 +44,6 @@ class ListaAnimalesAdopcion extends StatelessWidget {
 
   Widget _buildAnimalAdopcionCard(
       BuildContext context, Map<String, dynamic> animal) {
-    // Personaliza este método según la estructura de tus datos
     return Card(
       child: ListTile(
         title: Text('Nombre: ${animal['nombre']}'),
@@ -55,6 +53,7 @@ class ListaAnimalesAdopcion extends StatelessWidget {
             Text('Edad: ${animal['edad']} ${animal['tipoEdad']}'),
             Text('Esterilizado: ${animal['esterilizado']}'),
             Text('Peso: ${animal['peso']} ${animal['tipoPeso']}'),
+            // ... Otros detalles
 
             // Mostrar imágenes
             if (animal['imagenes'] != null && animal['imagenes'].length > 0)

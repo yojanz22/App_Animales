@@ -16,28 +16,60 @@ class DetallesDeAdopcion extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Nombre: ${adopcion['nombre']}'),
+            Text(
+              'Nombre: ${adopcion['nombre']}',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
             Text('Edad: ${adopcion['edad']} ${adopcion['tipoEdad']}'),
             Text('Esterilizado: ${adopcion['esterilizado']}'),
             Text('Peso: ${adopcion['peso']} ${adopcion['tipoPeso']}'),
 
-            // Mostrar imágenes
+            // Mostrar imágenes en una cuadrícula
             if (adopcion['imagenes'] != null && adopcion['imagenes'].length > 0)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Imágenes:'),
-                  for (var i = 0; i < adopcion['imagenes'].length; i++)
-                    Image.network(
-                      adopcion['imagenes'][i],
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
+                  Text(
+                    'Imágenes:',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
                     ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8.0,
+                        mainAxisSpacing: 8.0,
+                      ),
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: adopcion['imagenes'].length,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () {
+                            _mostrarImagenEnGrande(
+                                context, adopcion['imagenes'][index]);
+                          },
+                          child: Image.network(
+                            adopcion['imagenes'][index],
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
-
-            // Agrega más detalles según tus necesidades
 
             // Botón para hablar con el dueño
             ElevatedButton(
@@ -50,6 +82,26 @@ class DetallesDeAdopcion extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _mostrarImagenEnGrande(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.height * 0.8,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(imageUrl),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
