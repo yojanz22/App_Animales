@@ -1,3 +1,4 @@
+import 'package:appanimales/FormularioAdopcion.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -215,6 +216,19 @@ class _MenuPageState extends State<MenuPage>
                   MaterialPageRoute(
                     builder: (context) =>
                         MisMascotasPage(seleccionarPerdida: false),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Agregar Mascota en Adopción'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        FormularioAdopcion(), // Agrega el formulario de adopción aquí
                   ),
                 );
               },
