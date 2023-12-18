@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'detalles_de_adopcion.dart'; // Asegúrate de importar el archivo de detalles
+import 'detalles_de_adopcion.dart';
 
 class ListaAnimalesAdopcion extends StatelessWidget {
   @override
@@ -44,36 +44,42 @@ class ListaAnimalesAdopcion extends StatelessWidget {
 
   Widget _buildAnimalAdopcionCard(
       BuildContext context, Map<String, dynamic> animal) {
+    String imageUrl = ""; // Aquí almacenaremos la URL de la imagen
+    if (animal['imagenes'] != null && animal['imagenes'].isNotEmpty) {
+      imageUrl = animal['imagenes'][0]; // Tomamos la primera imagen
+    }
+
     return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      margin: EdgeInsets.all(10),
       child: ListTile(
-        title: Text('Nombre: ${animal['nombre']}'),
+        title: Text(
+          'Nombre: ${animal['nombre']}',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Edad: ${animal['edad']} ${animal['tipoEdad']}'),
             Text('Esterilizado: ${animal['esterilizado']}'),
             Text('Peso: ${animal['peso']} ${animal['tipoPeso']}'),
-            // ... Otros detalles
-
-            // Mostrar imágenes
-            if (animal['imagenes'] != null && animal['imagenes'].length > 0)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Imágenes:'),
-                  for (var i = 0; i < animal['imagenes'].length; i++)
-                    Image.network(
-                      animal['imagenes'][i],
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
-                ],
-              ),
           ],
         ),
+        leading: imageUrl.isNotEmpty
+            ? Image.network(
+                imageUrl,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              )
+            : SizedBox(width: 80, height: 80), // Placeholder si no hay imagen
         onTap: () {
-          // Navegar a la pantalla de detalles al tocar un elemento
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -81,6 +87,7 @@ class ListaAnimalesAdopcion extends StatelessWidget {
             ),
           );
         },
+        contentPadding: EdgeInsets.all(10),
       ),
     );
   }
