@@ -1,7 +1,8 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
 
 class FormularioAdopcion extends StatefulWidget {
@@ -13,15 +14,76 @@ class _FormularioAdopcionState extends State<FormularioAdopcion> {
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _edadController = TextEditingController();
   final TextEditingController _pesoController = TextEditingController();
-  final TextEditingController _razaController = TextEditingController();
-  final TextEditingController _descripcionController = TextEditingController();
 
-  final _formKey = GlobalKey<FormState>();
+  String _tipoEdad = 'Días';
+  String _tipoPeso = 'Kilogramos';
+  bool _esterilizado = false;
+  bool _noSabeEsterilizado = false;
+
+  List<File> _imagenes = [];
   final ImagePicker _imagePicker = ImagePicker();
 
-  bool _estaEsterilizado = false;
+  void _guardarInformacion() async {
+    try {
+      // Obtener una referencia a la colección 'animales_adopcion' en Firestore
+      CollectionReference animalesAdopcionCollection =
+          FirebaseFirestore.instance.collection('animales_adopcion');
 
-  String? _imagePath;
+      // Subir imágenes a Firebase Storage y obtener las URLs
+      List<String> urls = await _subirImagenes();
+
+      // Agregar la información a Firestore en la colección 'animales_adopcion'
+      await animalesAdopcionCollection.add({
+        'nombre': _nombreController.text,
+        'edad': _edadController.text,
+        'tipoEdad': _tipoEdad,
+        'peso': _pesoController.text,
+        'tipoPeso': _tipoPeso,
+        'esterilizado': _esterilizado,
+        'noSabeEsterilizado': _noSabeEsterilizado,
+        'imagenes': urls,
+        // Otros campos que desees agregar...
+      });
+
+      // Mensaje de éxito
+      print(
+          'Información guardada correctamente en la colección animales_adopcion.');
+
+      // Limpiar campos después de guardar la información
+      _limpiarCampos();
+    } catch (e) {
+      // Manejo de errores
+      print(
+          'Error al guardar la información en la colección animales_adopcion: $e');
+    }
+  }
+
+  Future<List<String>> _subirImagenes() async {
+    List<String> urls = [];
+
+    for (File imagen in _imagenes) {
+      try {
+        // Obtener referencia al storage
+        firebase_storage.Reference storageReference = firebase_storage
+            .FirebaseStorage.instance
+            .ref()
+            .child('imagenes_adopcion')
+            .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+        // Subir la imagen
+        await storageReference.putFile(imagen);
+
+        // Obtener la URL de la imagen
+        String imageUrl = await storageReference.getDownloadURL();
+        urls.add(imageUrl);
+      } catch (e) {
+        // Manejo de errores al subir imágenes
+        print('Error al subir la imagen: $e');
+      }
+    }
+
+    return urls;
+  }
 
   Future<void> _tomarFoto() async {
     try {
@@ -32,7 +94,7 @@ class _FormularioAdopcionState extends State<FormularioAdopcion> {
 
       if (pickedFile != null) {
         setState(() {
-          _imagePath = pickedFile.path;
+          _imagenes.add(File(pickedFile.path));
         });
       }
     } catch (e) {
@@ -40,78 +102,19 @@ class _FormularioAdopcionState extends State<FormularioAdopcion> {
     }
   }
 
-  Future<void> _seleccionarFoto() async {
+  Future<void> _seleccionarFotos() async {
     try {
-      final XFile? pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
+      final List<XFile>? pickedFiles = await _imagePicker.pickMultiImage(
         imageQuality: 70,
       );
 
-      if (pickedFile != null) {
+      if (pickedFiles != null) {
         setState(() {
-          _imagePath = pickedFile.path;
+          _imagenes.addAll(pickedFiles.map((file) => File(file.path)).toList());
         });
       }
     } catch (e) {
-      print('Error al seleccionar la foto: $e');
-    }
-  }
-
-  Future<void> _guardarMascota() async {
-    try {
-      // Validar el formulario
-      if (_formKey.currentState?.validate() ?? false) {
-        // Subir la imagen a Firebase Storage
-        String imageUrl = await _subirImagen();
-
-        // Agregar la información de la mascota a Firestore
-        await FirebaseFirestore.instance.collection('mascotas_adopcion').add({
-          'nombre': _nombreController.text,
-          'edad': _edadController.text,
-          'peso': _pesoController.text,
-          'raza': _razaController.text,
-          'descripcion': _descripcionController.text,
-          'estaEsterilizado': _estaEsterilizado,
-          'imagenUrl': imageUrl,
-          // Agregar más campos según sea necesario
-        });
-
-        // Mostrar mensaje de éxito
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Mascota en adopción agregada correctamente'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-
-        // Limpiar campos después de agregar la mascota
-        _limpiarCampos();
-      }
-    } catch (error) {
-      // Manejo de errores
-      print('Error al guardar la mascota: $error');
-    }
-  }
-
-  Future<String> _subirImagen() async {
-    try {
-      // Obtener referencia al storage
-      firebase_storage.Reference storageReference =
-          firebase_storage.FirebaseStorage.instance.ref().child(
-                'imagenes_mascotas_adopcion/${DateTime.now().millisecondsSinceEpoch}.jpg',
-              );
-
-      // Subir la imagen
-      await storageReference.putFile(File(_imagePath!));
-
-      // Obtener la URL de la imagen
-      String imageUrl = await storageReference.getDownloadURL();
-
-      return imageUrl;
-    } catch (e) {
-      // Manejo de errores
-      print('Error al subir la imagen: $e');
-      return '';
+      print('Error al seleccionar las fotos: $e');
     }
   }
 
@@ -119,109 +122,131 @@ class _FormularioAdopcionState extends State<FormularioAdopcion> {
     _nombreController.clear();
     _edadController.clear();
     _pesoController.clear();
-    _razaController.clear();
-    _descripcionController.clear();
-    _estaEsterilizado = false;
-    _imagePath = null;
+    _tipoEdad = 'Días';
+    _tipoPeso = 'Kilogramos';
+    _esterilizado = false;
+    _noSabeEsterilizado = false;
+    _imagenes.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Agregar Mascota en Adopción'),
+        title: Text('Formulario de Adopción'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                controller: _nombreController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingrese el nombre de la mascota';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(labelText: 'Nombre de la Mascota'),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: _edadController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingrese la edad de la mascota';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(labelText: 'Edad'),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: _pesoController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingrese el peso de la mascota';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(labelText: 'Peso'),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: _razaController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingrese la raza de la mascota';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(labelText: 'Raza'),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: _descripcionController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingrese la descripción de la mascota';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(labelText: 'Descripción'),
-              ),
-              SizedBox(height: 10),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _estaEsterilizado,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Complete el formulario de adopción:'),
+            SizedBox(height: 10),
+            TextFormField(
+              controller: _nombreController,
+              decoration: InputDecoration(labelText: 'Nombre de la Mascota'),
+            ),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextFormField(
+                    controller: _edadController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(labelText: 'Edad'),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButton<String>(
+                    value: _tipoEdad,
                     onChanged: (value) {
                       setState(() {
-                        _estaEsterilizado = value ?? false;
+                        _tipoEdad = value!;
                       });
                     },
+                    items: ['Días', 'Semanas', 'Años']
+                        .map((tipo) => DropdownMenuItem<String>(
+                              value: tipo,
+                              child: Text(tipo),
+                            ))
+                        .toList(),
                   ),
-                  Text('¿Está esterilizado?'),
-                ],
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  await _mostrarOpcionesFoto();
-                },
-                child: Text('Tomar o Seleccionar Foto'),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  _guardarMascota();
-                },
-                child: Text('Guardar Mascota en Adopción'),
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextFormField(
+                    controller: _pesoController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(labelText: 'Peso'),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButton<String>(
+                    value: _tipoPeso,
+                    onChanged: (value) {
+                      setState(() {
+                        _tipoPeso = value!;
+                      });
+                    },
+                    items: ['Kilogramos', 'Gramos']
+                        .map((tipo) => DropdownMenuItem<String>(
+                              value: tipo,
+                              child: Text(tipo),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                Checkbox(
+                  value: _esterilizado,
+                  onChanged: (value) {
+                    setState(() {
+                      _esterilizado = value!;
+                    });
+                  },
+                ),
+                Text('¿Está esterilizado?'),
+                SizedBox(width: 10),
+                Checkbox(
+                  value: _noSabeEsterilizado,
+                  onChanged: (value) {
+                    setState(() {
+                      _noSabeEsterilizado = value!;
+                      if (value!) {
+                        _esterilizado =
+                            false; // Desmarcar el checkbox principal si se selecciona "No lo sé"
+                      }
+                    });
+                  },
+                ),
+                Text('No lo sé'),
+              ],
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                await _mostrarOpcionesFoto();
+              },
+              child: Text('Tomar o Seleccionar Fotos'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _guardarInformacion,
+              child: Text('Guardar Información'),
+            ),
+          ],
         ),
       ),
     );
@@ -232,7 +257,7 @@ class _FormularioAdopcionState extends State<FormularioAdopcion> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Seleccionar Fuente de Foto'),
+          title: Text('Seleccionar Fuente de Fotos'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -242,7 +267,7 @@ class _FormularioAdopcionState extends State<FormularioAdopcion> {
                   await _tomarFoto();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Foto cargada correctamente'),
+                      content: Text('Fotos cargadas correctamente'),
                       duration: Duration(seconds: 2),
                     ),
                   );
@@ -252,10 +277,10 @@ class _FormularioAdopcionState extends State<FormularioAdopcion> {
               ElevatedButton(
                 onPressed: () async {
                   Navigator.pop(context);
-                  await _seleccionarFoto();
+                  await _seleccionarFotos();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Foto cargada correctamente'),
+                      content: Text('Fotos cargadas correctamente'),
                       duration: Duration(seconds: 2),
                     ),
                   );
