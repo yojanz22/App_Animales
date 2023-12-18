@@ -1,14 +1,14 @@
-import 'package:appanimales/EditarPerfil.dart';
-import 'package:appanimales/buzon.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'editarMascota.dart';
-import 'AgregarMascota.dart';
-import 'MisMascotas.dart';
-import 'GoogleMap.dart';
-import 'Mascotas.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:appanimales/EditarPerfil.dart';
+import 'package:appanimales/buzon.dart';
+import 'package:appanimales/AgregarMascota.dart';
+import 'package:appanimales/MisMascotas.dart';
+import 'package:appanimales/GoogleMap.dart';
+import 'package:appanimales/Mascotas.dart';
 
 class MenuPage extends StatefulWidget {
   final User? user;
@@ -32,6 +32,7 @@ class _MenuPageState extends State<MenuPage>
     super.initState();
     _tabController = TabController(length: 2, vsync: this)..addListener(() {});
     cargarInformacionUsuario();
+    _checkAndRequestPermissions();
   }
 
   void cargarInformacionUsuario() async {
@@ -62,6 +63,42 @@ class _MenuPageState extends State<MenuPage>
     } catch (error) {
       print('Error al cargar la información del usuario: $error');
     }
+  }
+
+  _checkAndRequestPermissions() async {
+    await _checkAndRequestLocationPermissions();
+    await _checkAndRequestNotificationPermissions();
+  }
+
+  _checkAndRequestLocationPermissions() async {
+    var status = await Permission.location.status;
+    if (status.isGranted) {
+      // Si los permisos están otorgados, obtén la ubicación actual
+      _getCurrentLocation();
+    } else {
+      // Si los permisos no están otorgados, solicita la autorización al usuario
+      var result = await Permission.location.request();
+      if (result.isGranted) {
+        // Si el usuario otorga permisos, obtén la ubicación actual
+        _getCurrentLocation();
+      } else {
+        // Maneja el caso en el que el usuario no otorga permisos
+        print('El usuario no otorgó permisos de ubicación.');
+      }
+    }
+  }
+
+  _checkAndRequestNotificationPermissions() async {
+    var status = await Permission.notification.status;
+    if (!status.isGranted) {
+      // Si los permisos de notificación no están otorgados, solicita la autorización al usuario
+      await Permission.notification.request();
+    }
+  }
+
+  _getCurrentLocation() async {
+    // Código para obtener la ubicación actual
+    // ...
   }
 
   @override
