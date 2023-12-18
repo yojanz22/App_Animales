@@ -1,3 +1,4 @@
+import 'package:appanimales/AdopcionLista.dart';
 import 'package:appanimales/FormularioAdopcion.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -229,6 +230,19 @@ class _MenuPageState extends State<MenuPage>
                   MaterialPageRoute(
                     builder: (context) =>
                         FormularioAdopcion(), // Agrega el formulario de adopción aquí
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Lista Adopcion'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ListaAnimalesAdopcion(), // Agrega el formulario de adopción aquí
                   ),
                 );
               },
