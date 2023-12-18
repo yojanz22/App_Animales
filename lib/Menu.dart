@@ -1,16 +1,18 @@
 import 'package:appanimales/AdopcionLista.dart';
+import 'package:appanimales/AgregarMascota.dart';
+import 'package:appanimales/EditarPerfil.dart';
 import 'package:appanimales/FormularioAdopcion.dart';
+import 'package:appanimales/GoogleMap.dart';
+import 'package:appanimales/Mascotas.dart';
+import 'package:appanimales/MisMascotas.dart';
+import 'package:appanimales/buzon.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:appanimales/EditarPerfil.dart';
-import 'package:appanimales/buzon.dart';
-import 'package:appanimales/AgregarMascota.dart';
-import 'package:appanimales/MisMascotas.dart';
-import 'package:appanimales/GoogleMap.dart';
-import 'package:appanimales/Mascotas.dart';
+
+// Importa las otras clases necesarias
 
 class MenuPage extends StatefulWidget {
   final User? user;
@@ -32,7 +34,7 @@ class _MenuPageState extends State<MenuPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this)..addListener(() {});
+    _tabController = TabController(length: 3, vsync: this)..addListener(() {});
     cargarInformacionUsuario();
     _checkAndRequestPermissions();
   }
@@ -55,11 +57,9 @@ class _MenuPageState extends State<MenuPage>
             direccion = data['direccion'] ?? '';
           });
         } else {
-          // Manejar el caso cuando el campo 'nombreUsuario' no está presente
           print('El campo "nombreUsuario" no está presente en el documento.');
         }
       } else {
-        // Manejar el caso cuando el documento no existe
         print('El documento no existe.');
       }
     } catch (error) {
@@ -75,16 +75,12 @@ class _MenuPageState extends State<MenuPage>
   _checkAndRequestLocationPermissions() async {
     var status = await Permission.location.status;
     if (status.isGranted) {
-      // Si los permisos están otorgados, obtén la ubicación actual
       _getCurrentLocation();
     } else {
-      // Si los permisos no están otorgados, solicita la autorización al usuario
       var result = await Permission.location.request();
       if (result.isGranted) {
-        // Si el usuario otorga permisos, obtén la ubicación actual
         _getCurrentLocation();
       } else {
-        // Maneja el caso en el que el usuario no otorga permisos
         print('El usuario no otorgó permisos de ubicación.');
       }
     }
@@ -93,7 +89,6 @@ class _MenuPageState extends State<MenuPage>
   _checkAndRequestNotificationPermissions() async {
     var status = await Permission.notification.status;
     if (!status.isGranted) {
-      // Si los permisos de notificación no están otorgados, solicita la autorización al usuario
       await Permission.notification.request();
     }
   }
@@ -101,6 +96,19 @@ class _MenuPageState extends State<MenuPage>
   _getCurrentLocation() async {
     // Código para obtener la ubicación actual
     // ...
+  }
+
+  Widget _buildPage(int index) {
+    switch (index) {
+      case 0:
+        return GoogleMapPage(initialPosition: LatLng(-33.0458, -71.6197));
+      case 1:
+        return MascotasPage();
+      case 2:
+        return ListaAnimalesAdopcion();
+      default:
+        return Container();
+    }
   }
 
   @override
@@ -128,8 +136,9 @@ class _MenuPageState extends State<MenuPage>
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'Google Map'),
-            Tab(text: 'Mascotas'),
+            Tab(text: 'Mapa'),
+            Tab(text: 'Mascotas Perdidas'),
+            Tab(text: 'Lista Adopcion'),
           ],
         ),
       ),
@@ -137,8 +146,9 @@ class _MenuPageState extends State<MenuPage>
         controller: _tabController,
         physics: NeverScrollableScrollPhysics(),
         children: [
-          GoogleMapPage(initialPosition: LatLng(-33.0458, -71.6197)),
-          MascotasPage(),
+          _buildPage(0),
+          _buildPage(1),
+          _buildPage(2),
         ],
       ),
       drawer: Drawer(
@@ -187,7 +197,7 @@ class _MenuPageState extends State<MenuPage>
             ListTile(
               title: Text('Ir a Buzón'),
               onTap: () {
-                Navigator.pop(context); // Cierra el drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -228,8 +238,7 @@ class _MenuPageState extends State<MenuPage>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        FormularioAdopcion(), // Agrega el formulario de adopción aquí
+                    builder: (context) => FormularioAdopcion(),
                   ),
                 );
               },
@@ -241,8 +250,7 @@ class _MenuPageState extends State<MenuPage>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        ListaAnimalesAdopcion(), // Agrega el formulario de adopción aquí
+                    builder: (context) => ListaAnimalesAdopcion(),
                   ),
                 );
               },
