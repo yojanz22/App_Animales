@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'editarMascota.dart';
 import 'formularioPerdida.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MisMascotasPage extends StatefulWidget {
   final bool seleccionarPerdida;
@@ -25,7 +26,10 @@ class _MisMascotasPageState extends State<MisMascotasPage> {
 
   Widget _buildMascotasList() {
     return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection('mascotas').snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('mascotas')
+          .where('idUsuario', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return CircularProgressIndicator();

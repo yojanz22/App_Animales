@@ -6,7 +6,7 @@ class FirebaseAuthService {
   Future<String?> registerWithEmailAndPassword(
     String email,
     String password,
-    String displayName, // Agrega el nombre del usuario
+    String displayName,
   ) async {
     try {
       await _auth.createUserWithEmailAndPassword(

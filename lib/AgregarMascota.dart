@@ -59,11 +59,10 @@ class _AgregarMascotaPageState extends State<AgregarMascotaPage> {
             'peso': _pesoController.text,
             'descripcion': _descripcionController.text,
             'idUsuario': userId,
-            'nombreUsuario': userName,
+            'nombreUsuario':
+                userName, // Asegúrate de que userName tenga el valor correcto
             'imagen': imageUrl,
-            'perdida':
-                false, // Nuevo campo para indicar si la mascota está perdida
-
+            'perdida': false,
             // Otros campos de la mascota...
           });
 
@@ -77,11 +76,13 @@ class _AgregarMascotaPageState extends State<AgregarMascotaPage> {
 
           // Limpiar campos después de agregar la mascota
           _limpiarCampos();
-
-          setState(() {
-            _cargando = false; // Ocultar pantalla de carga
-          });
+        } else {
+          print('El usuario no está autenticado');
         }
+
+        setState(() {
+          _cargando = false; // Ocultar pantalla de carga
+        });
       }
     } catch (e) {
       // Manejo de errores

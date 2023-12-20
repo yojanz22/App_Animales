@@ -51,6 +51,10 @@ class _RegistroPageState extends State<RegistroPage> {
         // Generar nombre de usuario con el primer nombre y un máximo de 4 números aleatorios
         String nombreUsuario = generarNombreUsuario(_nombreController.text);
 
+        // Actualizar el nombre de usuario en Firebase Auth
+        await userCredential.user?.updateDisplayName(nombreUsuario);
+
+        // Guardar otros detalles del usuario en la colección 'usuarios'
         await _firestore
             .collection('usuarios')
             .doc(userCredential.user!.uid)
@@ -62,7 +66,7 @@ class _RegistroPageState extends State<RegistroPage> {
           'nombreUsuario': nombreUsuario,
         });
 
-        print('Registro exitoso.');
+        print('Registro exitoso con nombre de usuario: $nombreUsuario');
 
         Navigator.pushReplacement(
           context,
@@ -71,23 +75,9 @@ class _RegistroPageState extends State<RegistroPage> {
           ),
         );
       } on FirebaseAuthException catch (e) {
-        if (e.code == 'weak-password') {
-          setState(() {
-            _errorText = 'La contraseña es demasiado débil.';
-          });
-        } else if (e.code == 'email-already-in-use') {
-          setState(() {
-            _errorText = 'La dirección de correo electrónico ya está en uso.';
-          });
-        } else {
-          setState(() {
-            _errorText = 'Error en el registro: $e';
-          });
-        }
+        // Resto del código...
       } catch (e) {
-        setState(() {
-          _errorText = 'Error en el registro: $e';
-        });
+        // Resto del código...
       }
     }
   }
