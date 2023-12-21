@@ -14,13 +14,12 @@ class FirebaseAuthService {
         password: password,
       );
 
-      // Actualiza el nombre del usuario en la autenticación de Firebase
+      // Update the user's display name in Firebase authentication
       await _auth.currentUser?.updateDisplayName(displayName);
 
-      return null; // Registro exitoso, devuelve null
+      return null; // Registration successful, returns null
     } on FirebaseAuthException catch (e) {
-      return e
-          .message; // Devuelve el mensaje de error específico en caso de fallo
+      return e.message; // Returns specific error message in case of failure
     }
   }
 
@@ -30,10 +29,9 @@ class FirebaseAuthService {
   ) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      return null; // Inicio de sesión exitoso, devuelve null
+      return null; // Sign-in successful, returns null
     } on FirebaseAuthException catch (e) {
-      return e
-          .message; // Devuelve el mensaje de error específico en caso de fallo
+      return e.message; // Returns specific error message in case of failure
     }
   }
 
@@ -47,5 +45,9 @@ class FirebaseAuthService {
 
   User? getCurrentUser() {
     return _auth.currentUser;
+  }
+
+  String? getCurrentUserId() {
+    return _auth.currentUser?.uid;
   }
 }

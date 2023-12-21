@@ -4,6 +4,7 @@ import 'package:appanimales/EditarPerfil.dart';
 import 'package:appanimales/FormularioAdopcion.dart';
 import 'package:appanimales/GoogleMap.dart';
 import 'package:appanimales/Mascotas.dart';
+import 'package:appanimales/MiAdopcionLista.dart';
 import 'package:appanimales/MisMascotas.dart';
 import 'package:appanimales/buzon.dart';
 import 'package:flutter/material.dart';
@@ -244,13 +245,13 @@ class _MenuPageState extends State<MenuPage>
               },
             ),
             ListTile(
-              title: Text('Lista Adopcion'),
+              title: Text('Mi Lista Adopcion'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ListaAnimalesAdopcion(),
+                    builder: (context) => MiAdopcionLista(),
                   ),
                 );
               },
