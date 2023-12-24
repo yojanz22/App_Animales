@@ -1,7 +1,9 @@
 import 'package:appanimales/Menu.dart';
 import 'package:appanimales/RegistroPage.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -39,6 +41,35 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _loginWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser!.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await _auth.signInWithCredential(credential);
+
+      // Obtener el usuario autenticado después del inicio de sesión exitoso
+      User? user = FirebaseAuth.instance.currentUser;
+
+      // Navegar a la página de menú pasando el usuario como parámetro
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MenuPage(user: user),
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error en el inicio de sesión con Google: $e';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,18 +102,11 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    // Lógica para autenticación con Google
-                  },
+                  onPressed: _loginWithGoogle,
                   child: Text('Google'),
                 ),
                 SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    // Lógica para autenticación con Facebook
-                  },
-                  child: Text('Facebook'),
-                ),
+                // Otros botones de autenticación si los tienes
               ],
             ),
             SizedBox(height: 10),
