@@ -228,15 +228,15 @@ class _MascotasPageState extends State<MascotasPage> {
               ),
           ],
         ),
-        onTap: () {
+        onTap: () async {
+          // Fetch the owner's name using ownerId from Firestore or another source
+
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => DetallesAnimalesPerdidos(
-                ubicacionPerdida: mascota[
-                    'ubicacionPerdida'], // Proporciona el nombre correcto del campo de tu Firestore
+                ubicacionPerdida: mascota['ubicacionPerdida'],
                 nombre: nombre,
-                ultimaUbicacion: ultimaUbicacion,
                 horaPerdida: horaPerdida,
                 fechaPerdida: fechaPerdida,
                 descripcion: descripcion,

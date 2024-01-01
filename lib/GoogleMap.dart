@@ -1,3 +1,4 @@
+import 'package:appanimales/DetallesAnimalesPerdios.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -116,7 +117,79 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
 
   void _showAnimalDetailsPopup(
       BuildContext context, QueryDocumentSnapshot document) {
-    // El código para mostrar los detalles del animal
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  document['nombre'] ?? 'Animal Perdido',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10.0),
+                Image.network(
+                  document['imagen'] ?? '',
+                  width: 150,
+                  height: 150,
+                  fit: BoxFit.cover,
+                ),
+                SizedBox(height: 10.0),
+                Text('Descripción: ${document['descripcion'] ?? ''}'),
+                Text('Edad: ${document['edad'] ?? ''}'),
+                Text('Fecha de Pérdida: ${document['fechaPerdida'] ?? ''}'),
+                Text('Hora de Pérdida: ${document['horaPerdida'] ?? ''}'),
+                Text('Raza: ${document['raza'] ?? ''}'),
+                Text('Peso: ${document['peso'] ?? ''}'),
+                Text('Tipo: ${document['tipo'] ?? ''}'),
+                SizedBox(height: 10.0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _navigateToDetailsPage(document);
+                  },
+                  child: Text('Ver Detalles'),
+                ),
+                SizedBox(height: 10.0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cerrar'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _navigateToDetailsPage(QueryDocumentSnapshot document) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetallesAnimalesPerdidos(
+          ubicacionPerdida: document['ubicacionPerdida'],
+          nombre: document['nombre'] ?? '',
+          horaPerdida: document['horaPerdida'] ?? '',
+          fechaPerdida: document['fechaPerdida'] ?? '',
+          descripcion: document['descripcion'] ?? '',
+          imageUrl: document['imagen'] ?? '',
+          recompensa: document['recompensa']?.toDouble(),
+        ),
+      ),
+    );
   }
 
   @override

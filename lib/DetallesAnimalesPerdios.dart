@@ -7,7 +7,6 @@ import 'GoogleMap.dart'; // Importa tu archivo GoogleMap.dart aquí
 class DetallesAnimalesPerdidos extends StatefulWidget {
   final Map<String, dynamic> ubicacionPerdida;
   final String nombre;
-  final String ultimaUbicacion;
   final String horaPerdida;
   final String fechaPerdida;
   final String descripcion;
@@ -17,7 +16,6 @@ class DetallesAnimalesPerdidos extends StatefulWidget {
   DetallesAnimalesPerdidos({
     required this.ubicacionPerdida,
     required this.nombre,
-    required this.ultimaUbicacion,
     required this.horaPerdida,
     required this.fechaPerdida,
     required this.descripcion,
@@ -63,7 +61,6 @@ class _DetallesAnimalesPerdidosState extends State<DetallesAnimalesPerdidos> {
             SizedBox(height: 10),
             _buildDetalle('Hora de Pérdida', _formatHoraPerdida()),
             _buildDetalle('Fecha de Pérdida', widget.fechaPerdida),
-            _buildDetalle('Última Ubicación', widget.ultimaUbicacion),
             _buildDetalle('Descripción', widget.descripcion),
             _buildRecompensa(),
             SizedBox(height: 20),

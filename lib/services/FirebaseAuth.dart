@@ -3,6 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 class FirebaseAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  User? get currentUser => _auth.currentUser;
+
+  String? get currentUserId => _auth.currentUser?.uid;
+
   Future<String?> registerWithEmailAndPassword(
     String email,
     String password,
@@ -14,12 +18,13 @@ class FirebaseAuthService {
         password: password,
       );
 
-      // Update the user's display name in Firebase authentication
-      await _auth.currentUser?.updateDisplayName(displayName);
+      // Actualiza el nombre de usuario en Firebase Authentication
+      await updateDisplayName(displayName);
 
-      return null; // Registration successful, returns null
+      return null; // Registro exitoso, devuelve null
     } on FirebaseAuthException catch (e) {
-      return e.message; // Returns specific error message in case of failure
+      return e
+          .message; // Devuelve un mensaje de error específico en caso de falla
     }
   }
 
@@ -29,9 +34,10 @@ class FirebaseAuthService {
   ) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      return null; // Sign-in successful, returns null
+      return null; // Inicio de sesión exitoso, devuelve null
     } on FirebaseAuthException catch (e) {
-      return e.message; // Returns specific error message in case of failure
+      return e
+          .message; // Devuelve un mensaje de error específico en caso de falla
     }
   }
 
@@ -43,11 +49,9 @@ class FirebaseAuthService {
     }
   }
 
-  User? getCurrentUser() {
-    return _auth.currentUser;
+  Future<void> updateDisplayName(String displayName) async {
+    await _auth.currentUser?.updateDisplayName(displayName);
   }
 
-  String? getCurrentUserId() {
-    return _auth.currentUser?.uid;
-  }
+  String? getCurrentUserId() {}
 }

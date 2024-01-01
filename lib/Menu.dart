@@ -1,19 +1,18 @@
-import 'package:appanimales/AdopcionLista.dart';
-import 'package:appanimales/AgregarMascota.dart';
-import 'package:appanimales/EditarPerfil.dart';
-import 'package:appanimales/FormularioAdopcion.dart';
-import 'package:appanimales/GoogleMap.dart';
-import 'package:appanimales/Mascotas.dart';
-import 'package:appanimales/MiAdopcionLista.dart';
-import 'package:appanimales/MisMascotas.dart';
-import 'package:appanimales/buzon.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-// Importa las otras clases necesarias
+import 'AdopcionLista.dart';
+import 'AgregarMascota.dart';
+import 'EditarPerfil.dart';
+import 'FormularioAdopcion.dart';
+import 'GoogleMap.dart';
+import 'Mascotas.dart';
+import 'MiAdopcionLista.dart';
+import 'MisMascotas.dart';
+import 'buzon.dart';
 
 class MenuPage extends StatefulWidget {
   final User? user;
@@ -49,6 +48,8 @@ class _MenuPageState extends State<MenuPage>
 
       if (userSnapshot.exists) {
         var data = userSnapshot.data() as Map<String, dynamic>;
+
+        print('Información del usuario: $data');
 
         if (data.containsKey('nombreUsuario')) {
           setState(() {

@@ -1,7 +1,6 @@
 import 'package:appanimales/Menu.dart';
 import 'package:appanimales/RegistroPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -24,10 +23,10 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
 
-      // Obtener el usuario autenticado después del inicio de sesión exitoso
+      // Obtain the authenticated user after successful login
       User? user = FirebaseAuth.instance.currentUser;
 
-      // Navegar a la página de menú pasando el usuario como parámetro
+      // Navigate to the MenuPage passing the user as a parameter
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -43,6 +42,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _loginWithGoogle() async {
     try {
+      // Sign in with Google
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       final GoogleSignInAuthentication googleAuth =
           await googleUser!.authentication;
@@ -51,12 +51,21 @@ class _LoginPageState extends State<LoginPage> {
         idToken: googleAuth.idToken,
       );
 
+      // Sign in with the Google credential
       await _auth.signInWithCredential(credential);
 
-      // Obtener el usuario autenticado después del inicio de sesión exitoso
+      // Obtain user information from GoogleSignInAccount
+      final GoogleSignInAccount? currentUser = await GoogleSignIn().currentUser;
+      String displayName = currentUser?.displayName ?? "No Name";
+      String email = currentUser?.email ?? "No Email";
+
+      // Display the user's name
+      print("User's Display Name: $displayName");
+
+      // Get the authenticated user
       User? user = FirebaseAuth.instance.currentUser;
 
-      // Navegar a la página de menú pasando el usuario como parámetro
+      // Navigate to the MenuPage passing the user as a parameter
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -106,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: Text('Google'),
                 ),
                 SizedBox(width: 10),
-                // Otros botones de autenticación si los tienes
+                // Other authentication buttons if needed
               ],
             ),
             SizedBox(height: 10),
