@@ -1,10 +1,9 @@
-import 'package:appanimales/services/FirebaseAuth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'detalles_de_adopcion.dart';
 
 class MiAdopcionLista extends StatelessWidget {
-  final FirebaseAuthService _authService = FirebaseAuthService();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,18 +15,10 @@ class MiAdopcionLista extends StatelessWidget {
   }
 
   Widget _buildListaAnimales(BuildContext context) {
-    String? currentUserId = _authService.getCurrentUserId();
-
-    if (currentUserId == null) {
-      return Center(
-        child: Text('Usuario no autenticado'),
-      );
-    }
-
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('animales_adopcion')
-          .where('propietario', isEqualTo: currentUserId)
+          .where('propietario', isEqualTo: getCurrentUserId())
           .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -95,15 +86,15 @@ class MiAdopcionLista extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.edit),
               onPressed: () {
-                // Agrega la lógica para editar aquí
-                // Puedes abrir un cuadro de diálogo de edición o navegar a una pantalla de edición.
+                // Navegar a una pantalla de edición
+                _navigateToEditScreen(context, animal);
               },
             ),
             IconButton(
               icon: Icon(Icons.delete),
               onPressed: () {
-                // Agrega la lógica para eliminar aquí
-                // Puedes mostrar un cuadro de diálogo de confirmación antes de eliminar.
+                // Mostrar cuadro de diálogo de confirmación
+                _showDeleteConfirmationDialog(context, animal);
               },
             ),
           ],
@@ -111,5 +102,59 @@ class MiAdopcionLista extends StatelessWidget {
         contentPadding: EdgeInsets.all(10),
       ),
     );
+  }
+
+  void _navigateToEditScreen(
+      BuildContext context, Map<String, dynamic> animal) {
+    // Implementa la navegación a la pantalla de edición aquí
+  }
+
+  void _showDeleteConfirmationDialog(
+      BuildContext context, Map<String, dynamic> animal) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Eliminar Animal'),
+          content: Text('¿Estás seguro de que quieres eliminar este animal?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Cerrar el cuadro de diálogo
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Eliminar el animal de la base de datos
+                _eliminarAnimal(animal[
+                    'id']); // Reemplaza 'id' con el campo real que identifica al animal
+                Navigator.pop(context); // Cerrar el cuadro de diálogo
+              },
+              child: Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _eliminarAnimal(String animalId) {
+    try {
+      FirebaseFirestore.instance
+          .collection('animales_adopcion')
+          .doc(animalId)
+          .delete();
+      print('Animal eliminado correctamente.');
+    } catch (e) {
+      print('Error al eliminar el animal: $e');
+    }
+  }
+
+  String getCurrentUserId() {
+    // Asumiendo que estás utilizando Firebase Authentication
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    return userId ??
+        ''; // Devuelve el ID del usuario actual o una cadena vacía si es nulo
   }
 }
