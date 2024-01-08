@@ -1,3 +1,4 @@
+import 'package:appanimales/ChatPage.dart';
 import 'package:appanimales/MapaGoogleUnico.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -143,9 +144,25 @@ class _DetallesAnimalesPerdidosState extends State<DetallesAnimalesPerdidos> {
               },
               child: Text('Cerrar'),
             ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the current dialog
+                _navigateToChatPage(); // Navigate to ChatPage
+              },
+              child: Text('Hablar'),
+            ),
           ],
         );
       },
+    );
+  }
+
+  void _navigateToChatPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatPage(nombreUsuario: widget.nombreUsuario),
+      ),
     );
   }
 
