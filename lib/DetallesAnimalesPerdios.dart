@@ -12,6 +12,7 @@ class DetallesAnimalesPerdidos extends StatefulWidget {
   final String descripcion;
   final String imageUrl;
   final double? recompensa;
+  final String nombreUsuario; // Nueva adición: nombreUsuario
 
   DetallesAnimalesPerdidos({
     required this.ubicacionPerdida,
@@ -21,6 +22,7 @@ class DetallesAnimalesPerdidos extends StatefulWidget {
     required this.descripcion,
     required this.imageUrl,
     this.recompensa,
+    required this.nombreUsuario, // Nueva adición: nombreUsuario
   });
 
   @override
@@ -68,7 +70,7 @@ class _DetallesAnimalesPerdidosState extends State<DetallesAnimalesPerdidos> {
               onPressed: () {
                 _mostrarDialogoContactar(context);
               },
-              child: Text('Hablar con el Dueño'),
+              child: Text('Hablar con el Dueño (${widget.nombreUsuario})'),
             ),
             SizedBox(height: 20),
             Row(
@@ -132,7 +134,7 @@ class _DetallesAnimalesPerdidosState extends State<DetallesAnimalesPerdidos> {
         return AlertDialog(
           title: Text('Contactar al Dueño'),
           content: Text(
-            'Puedes contactar al dueño del animal a través de la aplicación.',
+            'Puedes contactar al dueño del animal (${widget.nombreUsuario}) a través de la aplicación.',
           ),
           actions: [
             TextButton(

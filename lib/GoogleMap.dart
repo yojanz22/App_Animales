@@ -182,6 +182,7 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
         builder: (context) => DetallesAnimalesPerdidos(
           ubicacionPerdida: document['ubicacionPerdida'],
           nombre: document['nombre'] ?? '',
+          nombreUsuario: document['nombreUsuario'] ?? '',
           horaPerdida: document['horaPerdida'] ?? '',
           fechaPerdida: document['fechaPerdida'] ?? '',
           descripcion: document['descripcion'] ?? '',

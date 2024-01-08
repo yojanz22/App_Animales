@@ -11,7 +11,6 @@ import 'GoogleMap.dart';
 import 'Mascotas.dart';
 import 'MiAdopcionLista.dart';
 import 'MisMascotas.dart';
-import 'buzon.dart';
 
 class MenuPage extends StatefulWidget {
   final User? user;
@@ -191,18 +190,6 @@ class _MenuPageState extends State<MenuPage>
                       telefonoActual: telefono,
                       direccionActual: direccion,
                     ),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              title: Text('Ir a Buzón'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BuzonPage(),
                   ),
                 );
               },

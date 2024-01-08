@@ -154,6 +154,8 @@ class _MascotasPageState extends State<MascotasPage> {
             var descripcion = mascota?['descripcion'] as String? ??
                 'Descripción no disponible';
             var imageUrl = mascota?['imagen'] as String? ?? '';
+            var nombreUsuario =
+                mascota?['nombreUsuario'] as String? ?? 'Dueño no disponible';
 
             // Aplicar filtros
             if (tipoSeleccionado != 'Todos' && tipoSeleccionado != tipo) {
@@ -177,6 +179,7 @@ class _MascotasPageState extends State<MascotasPage> {
               imageUrl,
               context,
               mascotasPerdidas[index],
+              nombreUsuario, // Pasa el nombreUsuario como parámetro adicional
             );
           },
         );
@@ -193,6 +196,7 @@ class _MascotasPageState extends State<MascotasPage> {
     String imageUrl,
     BuildContext context,
     DocumentSnapshot mascota,
+    String nombreUsuario, // Agrega el parámetro nombreUsuario
   ) {
     bool tieneRecompensa = mascota['recompensa'] != null;
     double recompensa =
@@ -214,6 +218,7 @@ class _MascotasPageState extends State<MascotasPage> {
             Text('Hora de pérdida: $horaPerdida'),
             Text('Fecha de pérdida: $fechaPerdida'),
             Text('Descripción: $descripcion'),
+            Text('Dueño: $nombreUsuario'), // Muestra el nombre del dueño
             if (tieneRecompensa)
               Container(
                 color: Colors.amber,
@@ -229,8 +234,6 @@ class _MascotasPageState extends State<MascotasPage> {
           ],
         ),
         onTap: () async {
-          // Fetch the owner's name using ownerId from Firestore or another source
-
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -242,6 +245,8 @@ class _MascotasPageState extends State<MascotasPage> {
                 descripcion: descripcion,
                 imageUrl: imageUrl,
                 recompensa: recompensa,
+                nombreUsuario:
+                    nombreUsuario, // Pasa el nombreUsuario a DetallesAnimalesPerdidos
               ),
             ),
           );
