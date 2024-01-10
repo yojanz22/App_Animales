@@ -52,8 +52,8 @@ class _ChatPageState extends State<ChatPage> {
                 var messages = snapshot.data!.docs;
                 List<Widget> messageWidgets = [];
                 for (var message in messages) {
-                  var messageText = message['text'];
-                  var messageSender = message['sender'];
+                  var messageText = message['text'] ?? '';
+                  var messageSender = message['sender'] ?? '';
 
                   var messageWidget =
                       _buildMessageWidget(messageSender, messageText);
@@ -72,9 +72,31 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Widget _buildMessageWidget(String sender, String text) {
-    return ListTile(
-      title: Text('$sender: $text'),
+  Widget _buildMessageWidget(String senderId, String text) {
+    return FutureBuilder(
+      future: _getUsernameById(senderId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          var senderUsername = snapshot.data as String?;
+          var isCurrentUser = senderId == _user.uid;
+
+          return ListTile(
+            title: Text('$senderUsername: $text'),
+            tileColor: isCurrentUser ? Colors.blue[100] : Colors.grey[300],
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: isCurrentUser ? 64.0 : 8.0,
+              vertical: 4.0,
+            ),
+            visualDensity: VisualDensity.compact,
+            leading: isCurrentUser ? null : Icon(Icons.person),
+            trailing: isCurrentUser ? Icon(Icons.person) : null,
+          );
+        }
+      },
     );
   }
 
@@ -116,6 +138,20 @@ class _ChatPageState extends State<ChatPage> {
         'timestamp': FieldValue.serverTimestamp(),
       });
       _messageController.clear();
+    }
+  }
+
+  Future<String> _getUsernameById(String userId) async {
+    try {
+      if (userId != null && userId.isNotEmpty) {
+        var userDoc = await _firestore.collection('usuarios').doc(userId).get();
+        return userDoc['nombre'] as String? ?? 'Usuario Desconocido';
+      } else {
+        return 'Usuario Desconocido';
+      }
+    } catch (e) {
+      print('Error al obtener el nombre de usuario: $e');
+      return 'Usuario Desconocido';
     }
   }
 }
