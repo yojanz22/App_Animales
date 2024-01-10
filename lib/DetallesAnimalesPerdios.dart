@@ -149,6 +149,7 @@ class _DetallesAnimalesPerdidosState extends State<DetallesAnimalesPerdidos> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
+                print('Nombre de usuario: ${widget.nombreUsuario}');
                 _navigateToChatPage(widget.nombreUsuario, widget.idMascota);
               },
               child: Text('Hablar'),
