@@ -188,6 +188,7 @@ class _GoogleMapPageState extends State<GoogleMapPage> {
           descripcion: document['descripcion'] ?? '',
           imageUrl: document['imagen'] ?? '',
           recompensa: document['recompensa']?.toDouble(),
+          idMascota: document.id, // Asigna el ID del documento como idMascota
         ),
       ),
     );

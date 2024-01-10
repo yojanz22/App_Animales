@@ -13,7 +13,8 @@ class DetallesAnimalesPerdidos extends StatefulWidget {
   final String descripcion;
   final String imageUrl;
   final double? recompensa;
-  final String nombreUsuario; // Nueva adición: nombreUsuario
+  final String nombreUsuario;
+  final String idMascota;
 
   DetallesAnimalesPerdidos({
     required this.ubicacionPerdida,
@@ -23,7 +24,8 @@ class DetallesAnimalesPerdidos extends StatefulWidget {
     required this.descripcion,
     required this.imageUrl,
     this.recompensa,
-    required this.nombreUsuario, // Nueva adición: nombreUsuario
+    required this.nombreUsuario,
+    required this.idMascota,
   });
 
   @override
@@ -146,8 +148,8 @@ class _DetallesAnimalesPerdidosState extends State<DetallesAnimalesPerdidos> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Close the current dialog
-                _navigateToChatPage(); // Navigate to ChatPage
+                Navigator.pop(context);
+                _navigateToChatPage(widget.nombreUsuario, widget.idMascota);
               },
               child: Text('Hablar'),
             ),
@@ -157,26 +159,38 @@ class _DetallesAnimalesPerdidosState extends State<DetallesAnimalesPerdidos> {
     );
   }
 
-  void _navigateToChatPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatPage(nombreUsuario: widget.nombreUsuario),
-      ),
-    );
+  void _navigateToChatPage(String nombreUsuario, String idMascota) {
+    if (nombreUsuario.isNotEmpty && idMascota.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatPage(
+            nombreUsuario: nombreUsuario,
+            idMascota: idMascota,
+          ),
+        ),
+      );
+    } else {
+      print('Error: nombreUsuario o idMascota está vacío.');
+    }
   }
 
   void _mostrarEnMapa(BuildContext context) {
-    double latitude = widget.ubicacionPerdida['latitude'];
-    double longitude = widget.ubicacionPerdida['longitude'];
+    if (widget.ubicacionPerdida['latitude'] != null &&
+        widget.ubicacionPerdida['longitude'] != null) {
+      double latitude = widget.ubicacionPerdida['latitude'];
+      double longitude = widget.ubicacionPerdida['longitude'];
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MapaGoogleUnico(
-          ubicacion: LatLng(latitude, longitude),
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MapaGoogleUnico(
+            ubicacion: LatLng(latitude, longitude),
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      print('Error: La ubicación es nula.');
+    }
   }
 }

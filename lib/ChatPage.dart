@@ -3,9 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatPage extends StatefulWidget {
+  final String idMascota;
   final String nombreUsuario;
 
-  ChatPage({required this.nombreUsuario});
+  ChatPage({required this.idMascota, required this.nombreUsuario});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -33,7 +34,14 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: StreamBuilder(
-              stream: _firestore.collection('chats').snapshots(),
+              stream: widget.idMascota != null && widget.idMascota.isNotEmpty
+                  ? _firestore
+                      .collection('chats')
+                      .doc(widget.idMascota)
+                      .collection('messages')
+                      .orderBy('timestamp')
+                      .snapshots()
+                  : null,
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return Center(
@@ -98,9 +106,13 @@ class _ChatPageState extends State<ChatPage> {
   void _sendMessage() {
     String message = _messageController.text;
     if (message.isNotEmpty) {
-      _firestore.collection('chats').add({
+      _firestore
+          .collection('chats')
+          .doc(widget.idMascota)
+          .collection('messages')
+          .add({
         'text': message,
-        'sender': _user.email,
+        'sender': _user.uid,
         'timestamp': FieldValue.serverTimestamp(),
       });
       _messageController.clear();

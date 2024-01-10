@@ -103,9 +103,26 @@ class _MascotasPageState extends State<MascotasPage> {
   }
 
   void _aplicarFiltros() {
-    // Implementa la lógica para aplicar los filtros a tu consulta Firestore
-    // Consulta Firestore con los filtros seleccionados (tipoSeleccionado, distancia, fecha, hora).
-    // Puedes usar estos valores en la consulta Firestore para filtrar los resultados.
+    CollectionReference mascotasCollection =
+        FirebaseFirestore.instance.collection('mascotas');
+
+    Query filtroQuery = mascotasCollection.where('perdida', isEqualTo: true);
+
+    // Aplicar filtro por tipo
+    if (tipoSeleccionado != 'Todos') {
+      filtroQuery = filtroQuery.where('tipo', isEqualTo: tipoSeleccionado);
+    }
+
+    // Aplicar filtro por fecha
+    if (fechaSeleccionada != null) {
+      filtroQuery = filtroQuery.where(
+        'fechaPerdida',
+        isEqualTo: fechaSeleccionada!.toLocal().toString(),
+      );
+    }
+
+    // Actualizar el StreamBuilder con la nueva consulta
+    // Puedes almacenar 'filtroQuery' en una variable de estado y utilizarla en el StreamBuilder.
   }
 
   @override
@@ -137,25 +154,26 @@ class _MascotasPageState extends State<MascotasPage> {
           return Center(child: CircularProgressIndicator());
         }
 
-        var mascotasPerdidas = snapshot.data?.docs;
+        QuerySnapshot mascotasPerdidas = snapshot.data!;
+
         return ListView.builder(
-          itemCount: mascotasPerdidas!.length,
+          itemCount: mascotasPerdidas.size,
           itemBuilder: (context, index) {
-            var mascota = mascotasPerdidas[index].data();
-            var nombre =
-                mascota?['nombre'] as String? ?? 'Nombre no disponible';
-            var tipo = mascota?['tipo'] as String? ?? 'Tipo no disponible';
-            var ultimaUbicacion = mascota?['ultimaDireccionVista'] as String? ??
+            var mascota =
+                mascotasPerdidas.docs[index].data() as Map<String, dynamic>;
+            var nombre = mascota['nombre'] as String? ?? 'Nombre no disponible';
+            var tipo = mascota['tipo'] as String? ?? 'Tipo no disponible';
+            var ultimaUbicacion = mascota['ultimaDireccionVista'] as String? ??
                 'Ubicación no disponible';
             var horaPerdida =
-                mascota?['horaPerdida'] as String? ?? 'Hora no disponible';
+                mascota['horaPerdida'] as String? ?? 'Hora no disponible';
             var fechaPerdida =
-                mascota?['fechaPerdida'] as String? ?? 'Fecha no disponible';
-            var descripcion = mascota?['descripcion'] as String? ??
+                mascota['fechaPerdida'] as String? ?? 'Fecha no disponible';
+            var descripcion = mascota['descripcion'] as String? ??
                 'Descripción no disponible';
-            var imageUrl = mascota?['imagen'] as String? ?? '';
+            var imageUrl = mascota['imagen'] as String? ?? '';
             var nombreUsuario =
-                mascota?['nombreUsuario'] as String? ?? 'Dueño no disponible';
+                mascota['nombreUsuario'] as String? ?? 'Dueño no disponible';
 
             // Aplicar filtros
             if (tipoSeleccionado != 'Todos' && tipoSeleccionado != tipo) {
@@ -178,7 +196,7 @@ class _MascotasPageState extends State<MascotasPage> {
               descripcion,
               imageUrl,
               context,
-              mascotasPerdidas[index],
+              mascotasPerdidas.docs[index],
               nombreUsuario, // Pasa el nombreUsuario como parámetro adicional
             );
           },
@@ -195,7 +213,7 @@ class _MascotasPageState extends State<MascotasPage> {
     String descripcion,
     String imageUrl,
     BuildContext context,
-    DocumentSnapshot mascota,
+    QueryDocumentSnapshot mascota,
     String nombreUsuario, // Agrega el parámetro nombreUsuario
   ) {
     bool tieneRecompensa = mascota['recompensa'] != null;
@@ -238,15 +256,16 @@ class _MascotasPageState extends State<MascotasPage> {
             context,
             MaterialPageRoute(
               builder: (context) => DetallesAnimalesPerdidos(
-                ubicacionPerdida: mascota['ubicacionPerdida'],
+                ubicacionPerdida:
+                    mascota['ubicacionPerdida'] as Map<String, dynamic>,
                 nombre: nombre,
                 horaPerdida: horaPerdida,
                 fechaPerdida: fechaPerdida,
                 descripcion: descripcion,
                 imageUrl: imageUrl,
                 recompensa: recompensa,
-                nombreUsuario:
-                    nombreUsuario, // Pasa el nombreUsuario a DetallesAnimalesPerdidos
+                nombreUsuario: nombreUsuario,
+                idMascota: mascota.id, // Usa el ID de la mascota como idMascota
               ),
             ),
           );
